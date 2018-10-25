@@ -10,8 +10,12 @@
 #include <proto/intuition.h>
 #include <proto/dos.h>
 #include <intuition/screens.h>
+#include <proto/graphics.h>
+#include <proto/layers.h>
+#include <proto/exec.h>
 #include "screen.h"
 #include "protocol.h"
+#include "scale.h"
 
 unsigned char CharWide=8;
 unsigned char CharHigh=16;
@@ -20,8 +24,6 @@ extern padBool FastText; /* protocol.c */
 padPt TTYLoc;
 unsigned char FONT_SIZE_X;
 unsigned char FONT_SIZE_Y;
-unsigned short* scalex;
-unsigned short* scaley;
 unsigned char* font;
 unsigned short* fontptr;
 unsigned short width;
@@ -34,6 +36,7 @@ unsigned char is_mono=0;
 extern void done(void);
 
 struct IntuitionBase *IntuitionBase;
+struct GfxBase *GfxBase;
 
 struct NewScreen Screen1 = {
   0,0,640,400,4,             /* Screen of 640 x 400 of depth 8 (2^4 = 16 colours)    */
@@ -68,8 +71,13 @@ struct NewWindow winlayout = {
 void screen_init(void)
 {
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
-
+  
   if (!IntuitionBase)
+    done();
+
+  GfxBase = (struct GfxBase *)OpenLibrary("graphics.library",34);
+
+  if (!GfxBase)
     done();
   
   myScreen = OpenScreen(&Screen1);
@@ -82,23 +90,6 @@ void screen_init(void)
   if (!myWindow)
     done();
 }
-
-/**
- * screen_load_driver()
- * Load the TGI driver
- */
-void screen_load_driver(void)
-{
-}
-
-/**
- * screen_init_hook()
- * Called after tgi_init to set any special features, e.g. nmi trampolines.
- */
-void screen_init_hook(void)
-{
-}
-
 
 /**
  * screen_update_colors() - Set the terminal colors
@@ -140,6 +131,7 @@ void screen_block_draw(padPt* Coord1, padPt* Coord2)
  */
 void screen_dot_draw(padPt* Coord)
 {
+  WritePixel(myWindow->RPort,scalex[Coord->x],scaley[Coord->y]);
 }
 
 /**
@@ -147,6 +139,8 @@ void screen_dot_draw(padPt* Coord)
  */
 void screen_line_draw(padPt* Coord1, padPt* Coord2)
 {
+  Move(myWindow->RPort,scalex[Coord1->x],scaley[Coord1->y]);
+  Draw(myWindow->RPort,scalex[Coord2->x],scaley[Coord2->y]);
 }
 
 /**

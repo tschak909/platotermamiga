@@ -7,10 +7,11 @@
  * scale.c - Scaling table to scale 512x512 to 640x400
  */
 
-#include <stdint.h>
+#ifndef SCALE_H
+#define SCALE_H
 
 /* X is centered on 640 */
-unsigned short scalex_hires[]={
+unsigned short scalex[]={
 64,65,66,67,68,69,70,71,
 72,73,74,75,76,77,78,79,
 80,81,82,83,84,85,86,87,
@@ -77,7 +78,7 @@ unsigned short scalex_hires[]={
 568,569,570,571,572,573,574,575,
 };
 
-unsigned short scaley_hires[]={
+unsigned short scaley[]={
 399,398,397,396,396,395,394,393,
 392,392,391,390,389,389,388,387,
 386,385,385,384,383,382,382,381,
@@ -143,3 +144,5 @@ unsigned short scaley_hires[]={
 12,11,11,10,9,8,8,7,
 6,5,4,4,3,2,1,0,
 };
+
+#endif /* SCALE_H */
