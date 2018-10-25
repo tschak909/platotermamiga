@@ -28,10 +28,18 @@ unsigned char* font;
 unsigned short* fontptr;
 unsigned short width;
 unsigned short height;
-unsigned char current_foreground;
-unsigned char current_background;
+unsigned long current_foreground=1;
+unsigned long current_background=0;
+padRGB current_foreground_rgb={255,255,255};
+padRGB current_background_rgb={0,0,0};
 unsigned char fontm23[2048];
 unsigned char is_mono=0;
+
+padRGB palette[16];
+
+#define TEXT_BITMAP_W 640
+#define TEXT_BITMAP_H 32
+struct BitMap* bmText = NULL; /* temporary bitmap for text output. */
 
 extern void done(void);
 
@@ -56,9 +64,9 @@ struct NewWindow winlayout = {
   639, 399,
   0,1,
   IDCMP_CLOSEWINDOW|IDCMP_MENUPICK|IDCMP_ACTIVEWINDOW|IDCMP_VANILLAKEY|IDCMP_MOUSEMOVE,
-  WFLG_ACTIVATE|WFLG_BACKDROP|WFLG_BORDERLESS,
+  WFLG_ACTIVATE|WFLG_BACKDROP|WFLG_BORDERLESS|WFLG_GIMMEZEROZERO,
   NULL, NULL,
-  "PLATOTerm!",
+  "PLATOTerm",
   NULL,NULL,
   640,400,
   640,400,
@@ -70,6 +78,7 @@ struct NewWindow winlayout = {
  */
 void screen_init(void)
 {
+  unsigned char *bp;
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
   
   if (!IntuitionBase)
@@ -89,6 +98,17 @@ void screen_init(void)
   
   if (!myWindow)
     done();
+
+  /* Initialize text staging bitmap. */
+  bmText=AllocMem(sizeof(struct BitMap), MEMF_PUBLIC|MEMF_CLEAR);
+  if (!bmText)
+    done();
+  InitBitMap(bmText,1,TEXT_BITMAP_W,TEXT_BITMAP_H);
+  bp=AllocRaster(TEXT_BITMAP_W,TEXT_BITMAP_H);
+  if (!bp)
+    done();
+  bmText->Planes[0]=bp;
+  
 }
 
 /**
@@ -96,6 +116,14 @@ void screen_init(void)
  */
 void screen_update_colors(void)
 {
+  long i=0;
+  for (i=0;i<16;i++)
+    {
+      unsigned long r=palette[i].red   >> 4;
+      unsigned long g=palette[i].green >> 4;
+      unsigned long b=palette[i].blue  >> 4;
+      SetRGB4(&myScreen->ViewPort,i,r,g,b);
+    }
 }
 
 /**
@@ -117,6 +145,33 @@ void screen_beep(void)
  */
 void screen_clear(void)
 {
+  SetRast(myWindow->RPort,current_background);
+
+  palette[0].red=current_background_rgb.red;
+  palette[0].green=current_background_rgb.green;
+  palette[0].blue=current_background_rgb.blue;
+
+  if ((current_background_rgb.red   != current_foreground_rgb.red) &&
+      (current_background_rgb.green != current_foreground_rgb.green) &&
+      (current_background_rgb.blue  != current_foreground_rgb.blue))
+    {
+      palette[1].red=current_foreground_rgb.red;
+      palette[1].green=current_foreground_rgb.green;
+      palette[1].blue=current_foreground_rgb.blue;
+    }
+
+  screen_update_colors();
+}
+
+/**
+ * screen_set_pen_mode(void) - Set the pen mode
+ */
+void screen_set_pen_mode(void)
+{
+  if ((CurMode==ModeErase)||(CurMode==ModeInverse))
+    SetAPen(myWindow->RPort,current_background);
+  else
+    SetAPen(myWindow->RPort,current_foreground);
 }
 
 /**
@@ -124,6 +179,12 @@ void screen_clear(void)
  */
 void screen_block_draw(padPt* Coord1, padPt* Coord2)
 {
+  screen_set_pen_mode();
+  RectFill(myWindow->RPort,
+	   scalex[Coord1->x],
+	   scaley[Coord1->y],
+	   scalex[Coord2->x],
+	   scaley[Coord2->y]);
 }
 
 /**
@@ -131,6 +192,7 @@ void screen_block_draw(padPt* Coord1, padPt* Coord2)
  */
 void screen_dot_draw(padPt* Coord)
 {
+  screen_set_pen_mode();
   WritePixel(myWindow->RPort,scalex[Coord->x],scaley[Coord->y]);
 }
 
@@ -139,6 +201,7 @@ void screen_dot_draw(padPt* Coord)
  */
 void screen_line_draw(padPt* Coord1, padPt* Coord2)
 {
+  screen_set_pen_mode();
   Move(myWindow->RPort,scalex[Coord1->x],scaley[Coord1->y]);
   Draw(myWindow->RPort,scalex[Coord2->x],scaley[Coord2->y]);
 }
@@ -185,6 +248,11 @@ void screen_paint(padPt* Coord)
  */
 void screen_done(void)
 {
+  /* Free the text staging bitmap */
+  FreeRaster(bmText->Planes[0],TEXT_BITMAP_W,TEXT_BITMAP_H);
+  FreeMem(bmText,sizeof(struct BitMap));
+  bmText=NULL;
+  
   if (myWindow)
     CloseWindow(myWindow);
   if (myScreen)
