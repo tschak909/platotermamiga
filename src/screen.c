@@ -7,6 +7,9 @@
  * screen.h - Display output functions
  */
 
+#include <proto/intuition.h>
+#include <proto/dos.h>
+#include <intuition/screens.h>
 #include "screen.h"
 #include "protocol.h"
 
@@ -28,12 +31,56 @@ unsigned char current_background;
 unsigned char fontm23[2048];
 unsigned char is_mono=0;
 
+extern void done(void);
+
+struct IntuitionBase *IntuitionBase;
+
+struct NewScreen Screen1 = {
+  0,0,640,400,4,             /* Screen of 640 x 400 of depth 8 (2^4 = 16 colours)    */
+  DETAILPEN, BLOCKPEN,
+  HIRES|LACE,                     /* see graphics/view.h for view modes */
+  PUBLICSCREEN,              /* Screen types */
+  NULL,                      /* Text attributes (use defaults) */
+  "PLATOTerm",
+  NULL,
+  NULL
+};
+struct Screen *myScreen;
+
+struct Window *myWindow;
+struct NewWindow winlayout = {
+  0, 0,
+  639, 399,
+  0,1,
+  IDCMP_CLOSEWINDOW|IDCMP_MENUPICK|IDCMP_ACTIVEWINDOW|IDCMP_VANILLAKEY|IDCMP_MOUSEMOVE,
+  WFLG_ACTIVATE|WFLG_BACKDROP|WFLG_BORDERLESS,
+  NULL, NULL,
+  "PLATOTerm!",
+  NULL,NULL,
+  640,400,
+  640,400,
+  CUSTOMSCREEN
+};
 
 /**
  * screen_init() - Set up the screen
  */
 void screen_init(void)
 {
+  IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
+
+  if (!IntuitionBase)
+    done();
+  
+  myScreen = OpenScreen(&Screen1);
+  if (!myScreen)
+    done();  
+  winlayout.Screen=myScreen;
+  
+  myWindow = OpenWindow(&winlayout);
+  
+  if (!myWindow)
+    done();
 }
 
 /**
@@ -144,4 +191,8 @@ void screen_paint(padPt* Coord)
  */
 void screen_done(void)
 {
+  if (myWindow)
+    CloseWindow(myWindow);
+  if (myScreen)
+    CloseScreen(myScreen);
 }

@@ -26,3 +26,14 @@ int main(void)
       touch_main();
     }
 }
+
+/**
+ * Exit the program as gracefully as possible.
+ */
+void done(void)
+{
+  touch_done();
+  io_done();
+  screen_done();
+  exit(0); /* TODO: add exit code? */
+}

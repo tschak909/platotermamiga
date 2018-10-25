@@ -168,7 +168,7 @@ InitPLATOx (void)
   EscFlag = false;
   TTY = false;
   terminal_set_plato ();
-  SetMode (mAlpha, tByte);
+  _SetMode (mAlpha, tByte);
   LowX = 0;
   HiX = 0;
   LowY = 0;
@@ -269,7 +269,7 @@ Echo (padWord theKey)
 
 
 /*----------------------------------------------*
- *	SetCommand, SetMode			*
+ *	SetCommand, _SetMode			*
  *						*
  *	Set state machine variables.		*
  *----------------------------------------------*/
@@ -283,7 +283,7 @@ SetCommand (Mode theMode, DataType theType)
 }
 
 void
-SetMode (Mode theMode, DataType theType)
+_SetMode (Mode theMode, DataType theType)
 {
   PMode = theMode;
   PType = theType;
@@ -874,7 +874,7 @@ ShowPLATO (padByte *buff, unsigned short count)
 		  break;
 		  
 		case 0x50:
-		  SetMode (mLoadChar, tWord);
+		  _SetMode (mLoadChar, tWord);
 		  break;
 		case 0x51:
 		  SetCommand (mSSF, tWord);
@@ -883,16 +883,16 @@ ShowPLATO (padByte *buff, unsigned short count)
 		  SetCommand (mExternal, tWord);
 		  break;
 		case 0x53:
-		  SetMode (mLoadMem, tWord);
+		  _SetMode (mLoadMem, tWord);
 		  break;
 		case 0x54:
-		  SetMode (mMode5, tWord);
+		  _SetMode (mMode5, tWord);
 		  break;
 		case 0x55:
-		  SetMode (mMode6, tWord);
+		  _SetMode (mMode6, tWord);
 		  break;
 		case 0x56:
-		  SetMode (mMode7, tWord);
+		  _SetMode (mMode7, tWord);
 		  break;
 		case 0x57:
 		  SetCommand (mLoadAddr, tWord);
@@ -947,16 +947,16 @@ ShowPLATO (padByte *buff, unsigned short count)
 		  break;
 		  
 		case 0x19:
-		  SetMode (mBlock, tCoord);
+		  _SetMode (mBlock, tCoord);
 		  break;
 		case 0x1C:
-		  SetMode (mPoint, tCoord);
+		  _SetMode (mPoint, tCoord);
 		  break;
 		case 0x1D:
-		  SetMode (mLine, tCoord);
+		  _SetMode (mLine, tCoord);
 		  break;
 		case 0x1F:
-		  SetMode (mAlpha, tByte);
+		  _SetMode (mAlpha, tByte);
 		  break;
 		}
 	    }

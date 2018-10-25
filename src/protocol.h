@@ -60,7 +60,7 @@ void Touch(padPt* where);
 void Ext(padWord theKey);
 void Echo(padWord theKey);
 void SetCommand(Mode theMode, DataType theType);
-void SetMode(Mode theMode, DataType theType);
+void _SetMode(Mode theMode, DataType theType);
 void FixXY(short DX, short DY);
 void Superx(void);
 void Subx(void);
