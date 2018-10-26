@@ -2,7 +2,7 @@ TARGET_EXEC := PLATOTerm
 BUILD_DIR := ./build
 SRC_DIRS := ./src
 
-CC := vc +aos68k
+CC := vc +kick13
 
 SRCS := $(shell find $(SRC_DIRS) -name *.c)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)

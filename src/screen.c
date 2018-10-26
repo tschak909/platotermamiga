@@ -16,6 +16,7 @@
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
+#include "font.h"
 
 unsigned char CharWide=8;
 unsigned char CharHigh=16;
@@ -24,8 +25,6 @@ extern padBool FastText; /* protocol.c */
 padPt TTYLoc;
 unsigned char FONT_SIZE_X;
 unsigned char FONT_SIZE_Y;
-unsigned char* font;
-unsigned short* fontptr;
 unsigned short width;
 unsigned short height;
 unsigned long current_foreground=1;
@@ -40,6 +39,7 @@ padRGB palette[16];
 #define TEXT_BITMAP_W 640
 #define TEXT_BITMAP_H 32
 struct BitMap* bmText = NULL; /* temporary bitmap for text output. */
+struct BitMap* bmGlyph = NULL; /* bitmap for glyph. */
 
 extern void done(void);
 
@@ -108,7 +108,12 @@ void screen_init(void)
   if (!bp)
     done();
   bmText->Planes[0]=bp;
-  
+
+  /* Initialize glyph bitmap */
+  bmGlyph=AllocMem(sizeof(struct BitMap), MEMF_PUBLIC|MEMF_CLEAR);
+  if (!bmGlyph)
+    done();
+  InitBitMap(bmGlyph,1,8,12);  
 }
 
 /**
@@ -211,6 +216,55 @@ void screen_line_draw(padPt* Coord1, padPt* Coord2)
  */
 void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
 {
+  short offset;
+  short x,y;
+  unsigned char i=0;
+  unsigned short choffset;
+  
+  switch(CurMem)
+    {
+    case M0:
+      bmGlyph->Planes[0]=(unsigned char*)font;
+      offset=-32;
+      break;
+    case M1:
+      bmGlyph->Planes[0]=(unsigned char*)font;
+      offset=64;
+      break;
+    case M2:
+      bmGlyph->Planes[0]=(unsigned char*)fontm23;
+      offset=-32;
+      break;
+    case M3:
+      bmGlyph->Planes[0]=(unsigned char*)fontm23;
+      offset=32;
+      break;
+    }
+
+  switch(CurMode)
+    {
+    case ModeWrite:
+      break;
+    case ModeRewrite:
+      break;
+    case ModeErase:
+      break;
+    case ModeInverse:
+      break;
+    }
+  
+  x=scalex[Coord->x];
+  y=scaley[Coord->y]-12;
+  
+  for (i=0;i<count;i++)
+    {
+      choffset=fontptr[ch[i]+offset];
+      bmGlyph->Planes[0]=(unsigned char*)font+choffset;
+      /* BltBitMap(bmGlyph,0,0,myWindow->RPort->BitMap,x,y,8,12,0xC0,0xFF,NULL); */
+      BltBitMapRastPort(bmGlyph,0,0,myWindow->RPort,x,y,8,12,0xC0);
+      x+=8;
+    }
+  
 }
 
 /**
@@ -251,7 +305,9 @@ void screen_done(void)
   /* Free the text staging bitmap */
   FreeRaster(bmText->Planes[0],TEXT_BITMAP_W,TEXT_BITMAP_H);
   FreeMem(bmText,sizeof(struct BitMap));
+  FreeMem(bmGlyph,sizeof(struct BitMap));
   bmText=NULL;
+  bmGlyph=NULL;
   
   if (myWindow)
     CloseWindow(myWindow);

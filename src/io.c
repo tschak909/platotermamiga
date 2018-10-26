@@ -9,6 +9,28 @@
 
 #include "io.h"
 
+#include <exec/types.h>
+#include <exec/memory.h>
+#include <exec/io.h>
+#include <devices/serial.h>
+
+#include <clib/exec_protos.h>
+#include <clib/alib_protos.h>
+
+struct MsgPort  *SerialMP;          /* Define storage for one pointer */
+struct IOExtSer *SerialIO;         /* Define storage for one pointer */
+
+#define READ_BUFFER_SIZE 2048
+char SerialReadBuffer[READ_BUFFER_SIZE]; /* Reserve SIZE bytes storage */
+
+struct IOExtSer *SerialWriteIO = 0;
+struct MsgPort  *SerialWriteMP = 0;
+
+ULONG Temp;
+ULONG WaitMask;
+
+
+
 /**
  * io_init() - Set-up the I/O
  */
