@@ -306,6 +306,7 @@ void screen_done(void)
   FreeRaster(bmText->Planes[0],TEXT_BITMAP_W,TEXT_BITMAP_H);
   FreeMem(bmText,sizeof(struct BitMap));
   FreeMem(bmGlyph,sizeof(struct BitMap));
+  /* since bmGlyph points to an already in memory raster that wasn't allocated, it is not freed. */
   bmText=NULL;
   bmGlyph=NULL;
   
@@ -313,4 +314,9 @@ void screen_done(void)
     CloseWindow(myWindow);
   if (myScreen)
     CloseScreen(myScreen);
+
+  if (IntuitionBase)
+    CloseLibrary((struct Library*)IntuitionBase);
+  if (GfxBase)
+    CloseLibrary((struct Library*)GfxBase);
 }
