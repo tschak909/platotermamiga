@@ -1,7 +1,7 @@
 /**
  * PLATOTermAmiga - A PLATO Terminal for the Commodore Amiga
  * Based on Steve Peltz's PAD
- * 
+ *
  * Author: Thomas Cherryhomes <thom.cherryhomes at gmail dot com>
  *
  * screen.h - Display output functions
@@ -13,6 +13,7 @@
 #include <proto/graphics.h>
 #include <proto/layers.h>
 #include <proto/exec.h>
+#include <exec/memory.h>
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
@@ -80,7 +81,7 @@ void screen_init(void)
 {
   unsigned char *bp;
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
-  
+
   if (!IntuitionBase)
     done();
 
@@ -88,14 +89,14 @@ void screen_init(void)
 
   if (!GfxBase)
     done();
-  
+
   myScreen = OpenScreen(&Screen1);
   if (!myScreen)
-    done();  
+    done();
   winlayout.Screen=myScreen;
-  
+
   myWindow = OpenWindow(&winlayout);
-  
+
   if (!myWindow)
     done();
 
@@ -113,7 +114,7 @@ void screen_init(void)
   bmGlyph=AllocMem(sizeof(struct BitMap), MEMF_PUBLIC|MEMF_CLEAR);
   if (!bmGlyph)
     done();
-  InitBitMap(bmGlyph,1,8,12);  
+  InitBitMap(bmGlyph,1,8,12);
 }
 
 /**
@@ -220,7 +221,7 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
   short x,y;
   unsigned char i=0;
   unsigned short choffset;
-  
+
   switch(CurMem)
     {
     case M0:
@@ -252,10 +253,10 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
     case ModeInverse:
       break;
     }
-  
+
   x=scalex[Coord->x];
   y=scaley[Coord->y]-12;
-  
+
   for (i=0;i<count;i++)
     {
       choffset=fontptr[ch[i]+offset];
@@ -264,7 +265,7 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
       BltBitMapRastPort(bmGlyph,0,0,myWindow->RPort,x,y,8,12,0xC0);
       x+=8;
     }
-  
+
 }
 
 /**
@@ -309,7 +310,7 @@ void screen_done(void)
   /* since bmGlyph points to an already in memory raster that wasn't allocated, it is not freed. */
   bmText=NULL;
   bmGlyph=NULL;
-  
+
   if (myWindow)
     CloseWindow(myWindow);
   if (myScreen)
