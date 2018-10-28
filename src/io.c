@@ -41,6 +41,14 @@ void io_init(void)
   if (!ms->readport || !ms->writeport)
     done();
 
+  ms->readio  = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
+  ms->writeio = (struct IOExtSer *)CreateExtIO(ms->writeport, sizeof(struct IOExtSer));
+  if (!ms->readio || !ms->writeio)
+    done();
+
+  /* Serial port should be initialized, and open, at this point. */
+
+
 
 }
 
