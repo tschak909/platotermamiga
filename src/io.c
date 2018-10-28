@@ -47,23 +47,7 @@ void io_init(void)
     done();
 
   /* Serial port should be initialized, and open, at this point. */
-
-
-
-}
-
-/**
- * io_init_funcptrs() - Set up I/O function pointers
- */
-void io_init_funcptrs(void)
-{
-}
-
-/**
- * io_open() - Open the device
- */
-void io_open(void)
-{
+  /* TBD: do baud rate setting */
 }
 
 /**
@@ -78,15 +62,8 @@ void io_send_byte(unsigned char b)
  */
 void io_main(void)
 {
+  
 }
-
-/**
- * io_recv_serial() - Receive and interpret serial data.
- */
-void io_recv_serial(void)
-{
-}
-
 
 /**
  * io_done() - Called to close I/O
