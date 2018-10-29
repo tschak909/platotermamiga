@@ -13,6 +13,14 @@
 #define XON  0x11
 #define XOFF 0x13
 
+typedef struct _MySer
+{
+  struct MsgPort *writeport;  /** when the writeio is done, reply goes here **/
+  struct MsgPort *readport;   /** ibid for the readio **/
+  struct IOExtSer *readio, *writeio;
+  UBYTE writedata[2048], readdata[2048];  /** data space **/
+} MySer;
+
 /**
  * io_init() - Set-up the I/O
  */

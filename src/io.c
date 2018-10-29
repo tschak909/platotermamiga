@@ -14,18 +14,19 @@
 #include <devices/serial.h>
 
 #include "io.h"
+#include "protocol.h"
+
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
+#define true 1
+#define false 0
+
+unsigned char read_io_active=false;
 
 extern void done(void);
 
-typedef struct _MySer
-{
-  struct MsgPort *writeport;  /** when the writeio is done, reply goes here **/
-  struct MsgPort *readport;   /** ibid for the readio **/
-  struct IOExtSer *readio, *writeio;
-  UBYTE writedata[2048], readdata[2048];  /** data space **/
-} MySer;
-
 MySer* ms;
+struct Message* io_msg;
 
 /**
  * io_init() - Set-up the I/O
@@ -48,6 +49,15 @@ void io_init(void)
 
   /* Serial port should be initialized, and open, at this point. */
   /* TBD: do baud rate setting */
+
+  // Start the initial serial IO read.
+  ms->readio->IOSer.io_Command = CMD_READ;
+  ms->readio->IOSer.io_Flags = 0;
+  ms->readio->IOSer.io_Length = 1;
+  ms->readio->IOSer.io_Data = (APTR) ms->readdata;
+  SendIO((struct IORequest *)ms->readio);
+  read_io_active=true;
+
 }
 
 /**
@@ -62,7 +72,39 @@ void io_send_byte(unsigned char b)
  */
 void io_main(void)
 {
-  
+  long len;
+  if (io_msg=GetMsg(ms->readport))
+    {
+      /* process pending single byte */
+      ShowPLATO((padByte*)ms->readdata,1);
+
+      /* Ask if there are any more bytes */
+      ms->readio->IOSer.io_Command = SDCMD_QUERY;
+      ms->readio->IOSer.io_Length = 0;
+      DoIO((struct IORequest*)ms->readio);
+
+      if (ms->readio->IOSer.io_Actual)
+        {
+	  /* Some bytes still in queue, grab and output. */
+          ms->readio->IOSer.io_Command = CMD_READ;
+          len = ms->readio->IOSer.io_Actual;
+          len = MIN(256L, len);
+          ms->readio->IOSer.io_Length = len;
+          ms->readio->IOSer.io_Flags = 0;
+          ms->readio->IOSer.io_Data = (APTR) ms->readdata;
+          ms->readio->IOSer.io_Error = 0;
+          DoIO((struct IORequest*)ms->readio);
+	  ShowPLATO((padByte*)ms->readdata,len);
+        }
+
+      /* And finally, ask for another single byte. */
+      ms->readio->IOSer.io_Command = CMD_READ;
+      ms->readio->IOSer.io_Flags = 0;
+      ms->readio->IOSer.io_Length = 1;
+      ms->readio->IOSer.io_Data = (APTR) ms->readdata;
+      SendIO((struct IORequest*)ms->readio);
+
+    }
 }
 
 /**
@@ -70,6 +112,11 @@ void io_main(void)
  */
 void io_done(void)
 {
+  AbortIO((struct IORequest *)ms->writeio);
+  WaitIO((struct IORequest *)ms->writeio);
+  AbortIO((struct IORequest *)ms->readio);
+  WaitIO((struct IORequest *)ms->readio);
+
   if (ms)
     {
       CloseDevice((struct IORequest *)ms->readio);

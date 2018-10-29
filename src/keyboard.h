@@ -10,6 +10,12 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
+#include <exec/types.h>
+#include <exec/memory.h>
+#include <exec/libraries.h>
+#include <dos/dos.h>
+#include <devices/keyboard.h>
+
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
  * directly. Otherwise, platoKey is an access key, and the

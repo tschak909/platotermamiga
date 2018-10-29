@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <clib/exec_protos.h>
+#include <proto/intuition.h>
 #include <stdlib.h>
 #include "screen.h"
 #include "io.h"
@@ -12,6 +13,9 @@
 
 unsigned char already_started=false;
 
+extern MySer* ms;
+extern struct Window* myWindow;
+ 
 int main(void)
 {
   screen_init();
@@ -22,6 +26,7 @@ int main(void)
   terminal_initial_position();
   for (;;)
     {
+      Wait((1L << ms->readport->mp_SigBit) | ( 1L << myWindow->UserPort->mp_SigBit));
       io_main();
       keyboard_main();
       touch_main();
