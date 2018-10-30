@@ -1,0 +1,29 @@
+https://github.com/tschak909/platotermamiga
+
+toolchain: https://github.com/bebbo/amiga-gcc
+I had some trouble compiling this under Ubuntu. The default installation
+directory is /opt/amiga, so when running 'make all -j3' as a non-root user,
+it will fail because it can't access that directory. However, when running
+'make all -j3' as root (sudo), suddenly paths such as 'projects/binutils'
+became '/projects/binutils', which will fail because it's not  building
+in the root directory. In the end, what worked for me was to recursively
+change the ownership of /opt/amiga to my own user/group, do a non-root
+'make all -j3', and then recursively change the ownership of /opt/amiga back
+to root.root.
+
+Notes from Thom:
+
+1. RKM Serial Device reference:
+http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node009A.html
+
+2. Source code example (MicroTerm):
+http://aminet.net/package/comm/term/MicroTerm
+
+3. There is no need to manhandle the hardware directly, and if you use the OS,
+you can leverage better devices (like v34.device and baudbandit.device).
+
+4. Amiga's OS is ridiculously efficient, but its designer made some decisions 
+that mean you have to take a slightly more hands-on approach to doing things
+like I/O, basically opening message ports, creating I/O requests and sending
+them down the line, listening for signals, and then asking for messages that 
+come your way.
