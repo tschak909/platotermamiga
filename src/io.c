@@ -65,6 +65,12 @@ void io_init(void)
  */
 void io_send_byte(unsigned char b)
 {
+  long d=b;
+  ms->writeio->IOSer.io_Command = CMD_WRITE;
+  ms->writeio->IOSer.io_Flags = 0;
+  ms->writeio->IOSer.io_Length = 1;
+  ms->writeio->IOSer.io_Data = (APTR) d;
+  DoIO((struct IORequest *)ms->writeio);  /** wait till serial device has sent it **/
 }
 
 /**
