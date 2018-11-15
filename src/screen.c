@@ -273,6 +273,36 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
  */
 void screen_tty_char(padByte theChar)
 {
+  if ((theChar >= 0x20) && (theChar < 0x7F)) {
+    screen_char_draw(&TTYLoc, &theChar, 1);
+    TTYLoc.x += CharWide;
+  }
+  else if ((theChar == 0x0b)) /* Vertical Tab */
+    {
+      TTYLoc.y += CharHigh;
+    }
+  else if ((theChar == 0x08) && (TTYLoc.x > 7))	/* backspace */
+    {
+      TTYLoc.x -= CharWide;
+
+      // Implement backspace.
+    }
+  else if (theChar == 0x0A)			/* line feed */
+    TTYLoc.y -= CharHigh;
+  else if (theChar == 0x0D)			/* carriage return */
+    TTYLoc.x = 0;
+  
+  if (TTYLoc.x + CharWide > 511) {	/* wrap at right side */
+    TTYLoc.x = 0;
+    TTYLoc.y -= CharHigh;
+  }
+  
+  if (TTYLoc.y < 0) {
+    screen_clear();
+    TTYLoc.y=495;
+  }
+
+
 }
 
 /**

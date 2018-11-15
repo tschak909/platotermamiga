@@ -7,7 +7,17 @@
  * keyboard.h - Keyboard functions
  */
 
+#include <proto/intuition.h>
+#include <proto/dos.h>
+#include <proto/exec.h>
+
 #include "keyboard.h"
+#include "protocol.h"
+#include "io.h"
+#include "key.h"
+
+struct IntuiMessage* intuition_msg;
+extern struct Window *myWindow;
 
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
@@ -17,6 +27,17 @@
  */
 void keyboard_out(unsigned char platoKey)
 {
+  if (platoKey==0xff)
+    return;
+  
+  if (platoKey>0x7F)
+    {
+      Key(ACCESS);
+      Key(ACCESS_KEYS[platoKey-0x80]);
+      return;
+    }
+  Key(platoKey);
+  return;
 }
 
 /**
@@ -24,6 +45,14 @@ void keyboard_out(unsigned char platoKey)
  */
 void keyboard_main(void)
 {
+  while (intuition_msg = (struct IntuiMessage *) GetMsg(myWindow->UserPort))
+    {
+      if (intuition_msg->Class == VANILLAKEY)
+	{
+	  keyboard_out(key_to_pkey[intuition_msg->Code]);
+	  ReplyMsg((struct Message *)intuition_msg);
+	}
+    }
 }
 
 /**
@@ -38,4 +67,5 @@ void keyboard_clear(void)
  */
 void keyboard_out_tty(char ch)
 {
+  io_send_byte(ch);
 }

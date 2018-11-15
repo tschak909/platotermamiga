@@ -47,6 +47,12 @@ void io_init(void)
   if (!ms->readio || !ms->writeio)
     done();
 
+  if (OpenDevice("serial.device",0,(struct IORequest*)ms->readio,0L))
+    done();
+
+  ms->writeio->IOSer.io_Device=ms->readio->IOSer.io_Device;
+  ms->writeio->IOSer.io_Unit = ms->readio->IOSer.io_Unit;
+
   /* Serial port should be initialized, and open, at this point. */
   /* TBD: do baud rate setting */
 
@@ -65,11 +71,13 @@ void io_init(void)
  */
 void io_send_byte(unsigned char b)
 {
-  long d=b;
+  if (read_io_active==false)
+    return;
+
   ms->writeio->IOSer.io_Command = CMD_WRITE;
   ms->writeio->IOSer.io_Flags = 0;
   ms->writeio->IOSer.io_Length = 1;
-  ms->writeio->IOSer.io_Data = (APTR) d;
+  ms->writeio->IOSer.io_Data = (APTR) &b;
   DoIO((struct IORequest *)ms->writeio);  /** wait till serial device has sent it **/
 }
 
