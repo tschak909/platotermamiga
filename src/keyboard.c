@@ -18,6 +18,7 @@
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
+unsigned char shift_state=0;
 
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
@@ -49,7 +50,27 @@ void keyboard_main(void)
     {
       if (intuition_msg->Class == VANILLAKEY)
 	{
-	  keyboard_out(key_to_pkey[intuition_msg->Code]);
+	  if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
+	    {
+	      if (intuition_msg->Qualifier & IEQUALIFIER_LSHIFT)
+		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);
+	      else if (intuition_msg->Qualifier & IEQUALIFIER_RSHIFT)
+		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);
+	      else
+		keyboard_out(key_to_pkey[intuition_msg->Code]);		
+	    }
+	  else if (intuition_msg->Qualifier & IEQUALIFIER_CONTROL)
+	    {
+	      if (intuition_msg->Qualifier & IEQUALIFIER_LSHIFT)
+		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);
+	      else if (intuition_msg->Qualifier & IEQUALIFIER_RSHIFT)
+		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);
+	      else
+		keyboard_out(key_to_pkey[intuition_msg->Code]);
+	    }
+	  else
+	    keyboard_out(key_to_pkey[intuition_msg->Code]);
+	  
 	  ReplyMsg((struct Message *)intuition_msg);
 	}
     }
