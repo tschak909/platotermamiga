@@ -7,6 +7,7 @@
  * screen.h - Display output functions
  */
 
+#include <stdlib.h>
 #include <proto/intuition.h>
 #include <proto/dos.h>
 #include <intuition/screens.h>
@@ -24,8 +25,8 @@ unsigned char CharHigh=16;
 unsigned char screen_mode;
 extern padBool FastText; /* protocol.c */
 padPt TTYLoc;
-unsigned char FONT_SIZE_X;
-unsigned char FONT_SIZE_Y;
+unsigned char FONT_SIZE_X=8;
+unsigned char FONT_SIZE_Y=12;
 unsigned short width;
 unsigned short height;
 unsigned long current_foreground=1;
@@ -217,54 +218,239 @@ void screen_line_draw(padPt* Coord1, padPt* Coord2)
  */
 void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
 {
-  short offset;
-  short x,y;
-  unsigned char i=0;
-  unsigned short choffset;
 
+  short offset; /* due to negative offsets */
+  unsigned short x;      /* Current X and Y coordinates */
+  unsigned short y;
+  unsigned short* px;   /* Pointers to X and Y coordinates used for actual plotting */
+  unsigned short* py;
+  unsigned char i; /* current character counter */
+  unsigned char a; /* current character byte */
+  unsigned char j,k; /* loop counters */
+  char b; /* current character row bit signed */
+  unsigned char width=FONT_SIZE_X;
+  unsigned char height=FONT_SIZE_Y;
+  unsigned short deltaX=1;
+  unsigned short deltaY=1;
+  unsigned char mainColor=current_foreground;
+  unsigned char altColor=current_background;
+  unsigned char *p;
+  unsigned char* curfont;
+  
   switch(CurMem)
     {
     case M0:
-      bmGlyph->Planes[0]=(unsigned char*)font;
+      curfont=font;
       offset=-32;
       break;
     case M1:
-      bmGlyph->Planes[0]=(unsigned char*)font;
+      curfont=font;
       offset=64;
       break;
     case M2:
-      bmGlyph->Planes[0]=(unsigned char*)fontm23;
+      curfont=fontm23;
       offset=-32;
       break;
     case M3:
-      bmGlyph->Planes[0]=(unsigned char*)fontm23;
-      offset=32;
+      curfont=fontm23;
+      offset=32;      
       break;
     }
 
-  switch(CurMode)
+  if (CurMode==ModeRewrite)
     {
-    case ModeWrite:
-      break;
-    case ModeRewrite:
-      break;
-    case ModeErase:
-      break;
-    case ModeInverse:
-      break;
+      altColor=current_background;
     }
-
-  x=scalex[Coord->x];
-  y=scaley[Coord->y]-12;
-
-  for (i=0;i<count;i++)
+  else if (CurMode==ModeInverse)
     {
-      choffset=fontptr[ch[i]+offset];
-      bmGlyph->Planes[0]=(unsigned char*)font+choffset;
-      /* BltBitMap(bmGlyph,0,0,myWindow->RPort->BitMap,x,y,8,12,0xC0,0xFF,NULL); */
-      BltBitMapRastPort(bmGlyph,0,0,myWindow->RPort,x,y,8,12,0xC0);
-      x+=8;
+      altColor=current_foreground;
     }
+  
+  if (CurMode==ModeErase || CurMode==ModeInverse)
+    mainColor=current_background;
+  else
+    mainColor=current_foreground;
+
+  SetAPen(myWindow->RPort,mainColor);
+
+  x=scalex[(Coord->x&0x1FF)];
+  y=scaley[(Coord->y)+15&0x1FF];
+  
+  if (FastText==padF)
+    {
+      goto chardraw_with_fries;
+    }
+
+  /* the diet chardraw routine - fast text output. */
+  
+  for (i=0;i<count;++i)
+    {
+      a=*ch;
+      ++ch;
+      a+=offset;
+      p=&curfont[fontptr[a]];
+      
+      for (j=0;j<FONT_SIZE_Y;++j)
+  	{
+	  b=*p;
+
+  	  for (k=0;k<FONT_SIZE_X;++k)
+  	    {
+  	      if (b&0x80) /* check sign bit. */
+		{
+		  SetAPen(myWindow->RPort,mainColor);
+		  WritePixel(myWindow->RPort,x,y);
+		}
+
+	      ++x;
+  	      b<<=1;
+  	    }
+
+	  ++y;
+	  x-=width;
+	  ++p;
+  	}
+
+      x+=width;
+      y-=height;
+    }
+
+  return;
+
+ chardraw_with_fries:
+  if (Rotate)
+    {
+      deltaX=-abs(deltaX);
+      width=-abs(width);
+      px=&y;
+      py=&x;
+    }
+    else
+    {
+      px=&x;
+      py=&y;
+    }
+  
+  if (ModeBold)
+    {
+      deltaX = deltaY = 2;
+      width<<=1;
+      height<<=1;
+    }
+  
+  for (i=0;i<count;++i)
+    {
+      a=*ch;
+      ++ch;
+      a+=offset;
+      p=&curfont[fontptr[a]];
+      for (j=0;j<FONT_SIZE_Y;++j)
+  	{
+  	  b=*p;
+
+	  if (Rotate)
+	    {
+	      px=&y;
+	      py=&x;
+	    }
+	  else
+	    {
+	      px=&x;
+	      py=&y;
+	    }
+
+  	  for (k=0;k<FONT_SIZE_X;++k)
+  	    {
+  	      if (b&0x80) /* check sign bit. */
+		{
+		  SetAPen(myWindow->RPort,mainColor);
+		  if (ModeBold)
+		    {
+		      WritePixel(myWindow->RPort,*px+1,*py);
+		      WritePixel(myWindow->RPort,*px,*py+1);
+		      WritePixel(myWindow->RPort,*px+1,*py+1);
+		    }
+		  WritePixel(myWindow->RPort,*px,*py);
+		}
+	      else
+		{
+		  if (CurMode==ModeInverse || CurMode==ModeRewrite)
+		    {
+		      SetAPen(myWindow->RPort,altColor);
+		      if (ModeBold)
+			{
+			  WritePixel(myWindow->RPort,*px+1,*py);
+			  WritePixel(myWindow->RPort,*px,*py+1);
+			  WritePixel(myWindow->RPort,*px+1,*py+1);
+			}
+		      WritePixel(myWindow->RPort,*px,*py); 
+		    }
+		}
+
+	      x += deltaX;
+  	      b<<=1;
+  	    }
+
+	  y+=deltaY;
+	  x-=width;
+	  ++p;
+  	}
+
+      Coord->x+=width;
+      x+=width;
+      y-=height;
+    }
+
+  return;
+
+  /* short offset; */
+  /* short x,y; */
+  /* unsigned char i=0; */
+  /* unsigned short choffset; */
+
+  /* switch(CurMem) */
+  /*   { */
+  /*   case M0: */
+  /*     bmGlyph->Planes[0]=(unsigned char*)font; */
+  /*     offset=-32; */
+  /*     break; */
+  /*   case M1: */
+  /*     bmGlyph->Planes[0]=(unsigned char*)font; */
+  /*     offset=64; */
+  /*     break; */
+  /*   case M2: */
+  /*     bmGlyph->Planes[0]=(unsigned char*)fontm23; */
+  /*     offset=-32; */
+  /*     break; */
+  /*   case M3: */
+  /*     bmGlyph->Planes[0]=(unsigned char*)fontm23; */
+  /*     offset=32; */
+  /*     break; */
+  /*   } */
+
+  /* switch(CurMode) */
+  /*   { */
+  /*   case ModeWrite: */
+  /*     break; */
+  /*   case ModeRewrite: */
+  /*     break; */
+  /*   case ModeErase: */
+  /*     break; */
+  /*   case ModeInverse: */
+  /*     break; */
+  /*   } */
+
+  /* x=scalex[Coord->x]; */
+  /* y=scaley[Coord->y]-12; */
+
+  /* for (i=0;i<count;i++) */
+  /*   { */
+  /*     choffset=fontptr[ch[i]+offset]; */
+  /*     bmGlyph->Planes[0]=(unsigned char*)font+choffset; */
+  /*     /\* BltBitMap(bmGlyph,0,0,myWindow->RPort->BitMap,x,y,8,12,0xC0,0xFF,NULL); *\/ */
+  /*     BltBitMapRastPort(bmGlyph,0,0,myWindow->RPort,x,y,8,12,0xC0); */
+  /*     x+=8; */
+  /*   } */
 
 }
 
