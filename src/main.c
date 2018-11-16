@@ -7,7 +7,7 @@
 #include "splash.h"
 #include "keyboard.h"
 #include "touch.h"
-
+#include "menu.h"
 #define true 1
 #define false 0
 
@@ -19,6 +19,7 @@ extern struct Window* myWindow;
 int main(void)
 {
   screen_init();
+  menu_init();
   io_init();
   touch_init();
   terminal_init();

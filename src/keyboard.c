@@ -15,11 +15,12 @@
 #include "protocol.h"
 #include "io.h"
 #include "key.h"
+#include "menu.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
 unsigned char shift_state=0;
-
+extern void done(void);
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
  * directly. Otherwise, platoKey is an access key, and the
@@ -46,6 +47,13 @@ void keyboard_out(unsigned char platoKey)
  */
 void keyboard_main(void)
 {
+  /* Defines for determining menu selection */
+  UWORD menuNumber;
+  UWORD menuNum;
+  UWORD itemNum;
+  UWORD subNum;
+  struct MenuItem *item;
+
   while (intuition_msg = (struct IntuiMessage *) GetMsg(myWindow->UserPort))
     {
       if (intuition_msg->Class == VANILLAKEY)
@@ -73,6 +81,22 @@ void keyboard_main(void)
 	  
 	  ReplyMsg((struct Message *)intuition_msg);
 	}
+      /* handle menu selection messages */
+      if (intuition_msg->Class == IDCMP_MENUPICK) {
+          menuNumber = intuition_msg->Code;
+          menuNum = MENUNUM(menuNumber);
+          itemNum = ITEMNUM(menuNumber);
+          subNum = SUBNUM(menuNumber);
+          while(menuNumber != MENUNULL) {
+              item = ItemAddress(&menu1,menuNumber); 
+            if(menuNum == 0 && itemNum == 0 && subNum == 31)
+            {
+                done();
+            }
+            menuNumber = item->NextSelect;
+          }
+          ReplyMsg((struct Message *)intuition_msg);
+      }
     }
 }
 
