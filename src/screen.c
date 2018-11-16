@@ -15,6 +15,7 @@
 #include <proto/layers.h>
 #include <proto/exec.h>
 #include <exec/memory.h>
+#include <graphics/gfxmacros.h>
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
@@ -528,6 +529,7 @@ unsigned char screen_color_matching(padRGB* theColor)
 void screen_foreground(padRGB* theColor)
 {
   current_foreground=screen_color_matching(theColor);
+  SetOPen(myWindow->RPort,current_foreground);
   /* SetOutlinePen(myWindow->RPort,current_foreground); */
   screen_update_colors();
 }
@@ -547,7 +549,7 @@ void screen_background(padRGB* theColor)
  */
 void screen_paint(padPt* Coord)
 {
-  /* Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]); */
+  Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]);
 }
 
 /**
