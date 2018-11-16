@@ -35,6 +35,7 @@ padRGB current_foreground_rgb={255,255,255};
 padRGB current_background_rgb={0,0,0};
 unsigned char fontm23[2048];
 unsigned char is_mono=0;
+unsigned char highest_color_index=0;
 
 padRGB palette[16];
 
@@ -153,7 +154,7 @@ void screen_beep(void)
 void screen_clear(void)
 {
   SetRast(myWindow->RPort,current_background);
-
+  highest_color_index=1;
   palette[0].red=current_background_rgb.red;
   palette[0].green=current_background_rgb.green;
   palette[0].blue=current_background_rgb.blue;
@@ -165,6 +166,7 @@ void screen_clear(void)
       palette[1].red=current_foreground_rgb.red;
       palette[1].green=current_foreground_rgb.green;
       palette[1].blue=current_foreground_rgb.blue;
+      highest_color_index++;
     }
 
   screen_update_colors();
@@ -492,10 +494,42 @@ void screen_tty_char(padByte theChar)
 }
 
 /**
+ * screen_color_matching(color) - return index of matching color, or a new index, 
+ * if not found.
+ */
+unsigned char screen_color_matching(padRGB* theColor)
+{
+  unsigned char i;
+  for (i=0;i<16;i++)
+    {
+      if (i>highest_color_index)
+	{
+	  palette[i].red=theColor->red;
+	  palette[i].green=theColor->green;
+	  palette[i].blue=theColor->blue;
+	  highest_color_index++;
+	  return highest_color_index;
+	}
+      else
+	{
+	  if ((palette[i].red==theColor->red) && 
+	      (palette[i].green==theColor->green) && 
+	      (palette[i].blue==theColor->blue))
+	    {
+	      return i;
+	    }
+	}
+    }
+}
+
+/**
  * screen_foreground - set foreground color
  */
 void screen_foreground(padRGB* theColor)
 {
+  current_foreground=screen_color_matching(theColor);
+  /* SetOutlinePen(myWindow->RPort,current_foreground); */
+  screen_update_colors();
 }
 
 /**
@@ -503,6 +537,8 @@ void screen_foreground(padRGB* theColor)
  */
 void screen_background(padRGB* theColor)
 {
+  current_background=screen_color_matching(theColor);
+  screen_update_colors();
 }
 
 /**
@@ -511,6 +547,7 @@ void screen_background(padRGB* theColor)
  */
 void screen_paint(padPt* Coord)
 {
+  /* Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]); */
 }
 
 /**

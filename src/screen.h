@@ -111,6 +111,12 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count);
 void screen_tty_char(padByte theChar);
 
 /**
+ * screen_color_matching(color) - return index of matching color, or a new index, 
+ * if not found.
+ */
+unsigned char screen_color_matching(padRGB* theColor);
+
+/**
  * screen_foreground - set foreground color
  */
 void screen_foreground(padRGB* theColor);
