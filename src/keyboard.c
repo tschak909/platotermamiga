@@ -58,7 +58,14 @@ void keyboard_main(void)
     {
       if (intuition_msg->Class == VANILLAKEY)
 	{
-	  if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
+	  if (intuition_msg->Qualifier & IEQUALIFIER_RCOMMAND)
+	    {
+	      if (intuition_msg->Code=='x')
+		{
+		  done();
+		}
+	    }
+	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
 	      if (intuition_msg->Qualifier & IEQUALIFIER_LSHIFT)
 		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);

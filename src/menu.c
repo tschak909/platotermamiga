@@ -8,7 +8,7 @@
    { 0, 1, JAM2, 4, 2, NULL, "Quit", NULL };
    
    struct MenuItem item1 =
-   { NULL, 0, 0, 48, 12, ITEMTEXT|ITEMENABLED|HIGHCOMP, 0, &text1, &text1, NULL,    NULL, 0 };
+   { NULL, 0, 0, 80, 12, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &text1, &text1, 'X',    NULL, 0 };
    
    struct Menu menu1 = 
    { NULL, 0, 0, 48, 12, MENUENABLED, "File", &item1, 0, 0, 0, 0    };
