@@ -529,8 +529,6 @@ unsigned char screen_color_matching(padRGB* theColor)
 void screen_foreground(padRGB* theColor)
 {
   current_foreground=screen_color_matching(theColor);
-  SetOPen(myWindow->RPort,current_foreground);
-  /* SetOutlinePen(myWindow->RPort,current_foreground); */
   screen_update_colors();
 }
 
@@ -549,7 +547,9 @@ void screen_background(padRGB* theColor)
  */
 void screen_paint(padPt* Coord)
 {
+  SetOPen(myWindow->RPort,current_foreground);
   Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]);
+  BNDRYOFF(myWindow->RPort);
 }
 
 /**
