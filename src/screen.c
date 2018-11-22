@@ -16,6 +16,8 @@
 #include <proto/exec.h>
 #include <exec/memory.h>
 #include <graphics/gfxmacros.h>
+#include <graphics/text.h>
+#include <clib/diskfont_protos.h>
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
@@ -34,16 +36,10 @@ unsigned long current_foreground=1;
 unsigned long current_background=0;
 padRGB current_foreground_rgb={255,255,255};
 padRGB current_background_rgb={0,0,0};
-unsigned char fontm23[2048];
+ULONG* fontm23;
 unsigned char is_mono=0;
 unsigned char highest_color_index=0;
-
 padRGB palette[16];
-
-#define TEXT_BITMAP_W 640
-#define TEXT_BITMAP_H 32
-struct BitMap* bmText = NULL; /* temporary bitmap for text output. */
-struct BitMap* bmGlyph = NULL; /* bitmap for glyph. */
 
 extern void done(void);
 
@@ -77,6 +73,11 @@ struct NewWindow winlayout = {
   CUSTOMSCREEN
 };
 
+struct TextAttr plato_ta = {"PLATO.font",12,0,0};
+struct TextAttr platouser_ta = {"PLATOUser.font",12,0,0};
+struct TextFont* platoFont;
+struct TextFont* platoUserFont;
+
 /**
  * screen_init() - Set up the screen
  */
@@ -103,21 +104,18 @@ void screen_init(void)
   if (!myWindow)
     done();
 
-  /* Initialize text staging bitmap. */
-  bmText=AllocMem(sizeof(struct BitMap), MEMF_PUBLIC|MEMF_CLEAR);
-  if (!bmText)
-    done();
-  InitBitMap(bmText,1,TEXT_BITMAP_W,TEXT_BITMAP_H);
-  bp=AllocRaster(TEXT_BITMAP_W,TEXT_BITMAP_H);
-  if (!bp)
-    done();
-  bmText->Planes[0]=bp;
+  platoFont=OpenDiskFont(&plato_ta);
 
-  /* Initialize glyph bitmap */
-  bmGlyph=AllocMem(sizeof(struct BitMap), MEMF_PUBLIC|MEMF_CLEAR);
-  if (!bmGlyph)
+  if (!platoFont)
     done();
-  InitBitMap(bmGlyph,1,8,12);
+
+  platoUserFont=OpenDiskFont(&platouser_ta);
+
+  if (!platoUserFont)
+    done();
+
+  // This is probably very wrong, but...hey...
+  fontm23=platoUserFont->tf_CharData;
 }
 
 /**
@@ -221,239 +219,65 @@ void screen_line_draw(padPt* Coord1, padPt* Coord2)
  */
 void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
 {
-
-  short offset; /* due to negative offsets */
-  unsigned short x;      /* Current X and Y coordinates */
-  unsigned short y;
-  unsigned short* px;   /* Pointers to X and Y coordinates used for actual plotting */
-  unsigned short* py;
-  unsigned char i; /* current character counter */
-  unsigned char a; /* current character byte */
-  unsigned char j,k; /* loop counters */
-  char b; /* current character row bit signed */
-  unsigned char width=FONT_SIZE_X;
-  unsigned char height=FONT_SIZE_Y;
-  unsigned short deltaX=1;
-  unsigned short deltaY=1;
-  unsigned char mainColor=current_foreground;
-  unsigned char altColor=current_background;
-  unsigned char *p;
-  unsigned char* curfont;
+  struct Image textImage;
+  unsigned short* curfont;
+  short offset;
+  unsigned short* choffset;
+  unsigned char i=0;
+  short x,y;
   
   switch(CurMem)
     {
     case M0:
-      curfont=font;
-      offset=-32;
+      SetFont(myWindow->RPort,platoFont);
+      offset=0;
       break;
     case M1:
-      curfont=font;
-      offset=64;
+      SetFont(myWindow->RPort,platoFont);
+      offset=96;
       break;
     case M2:
-      curfont=fontm23;
+      SetFont(myWindow->RPort,platoUserFont);
+      // offset=0;
       offset=-32;
       break;
     case M3:
-      curfont=fontm23;
-      offset=32;      
+      SetFont(myWindow->RPort,platoUserFont);
+      // offset=64;
+      offset=32;
       break;
     }
 
-  if (CurMode==ModeRewrite)
+  switch(CurMode)
     {
-      altColor=current_background;
-    }
-  else if (CurMode==ModeInverse)
-    {
-      altColor=current_foreground;
-    }
-  
-  if (CurMode==ModeErase || CurMode==ModeInverse)
-    mainColor=current_background;
-  else
-    mainColor=current_foreground;
-
-  SetAPen(myWindow->RPort,mainColor);
-
-  x=scalex[(Coord->x&0x1FF)];
-  y=scaley[(Coord->y)+15&0x1FF];
-  
-  if (FastText==padF)
-    {
-      goto chardraw_with_fries;
+    case ModeWrite:
+      SetDrMd(myWindow->RPort,JAM1);
+      SetAPen(myWindow->RPort,current_foreground);
+      break;
+    case ModeRewrite:
+      SetDrMd(myWindow->RPort,JAM2);
+      SetAPen(myWindow->RPort,current_foreground);
+      SetBPen(myWindow->RPort,current_background);
+      break;
+    case ModeErase:
+      SetDrMd(myWindow->RPort,JAM1);
+      SetAPen(myWindow->RPort,current_background);
+      break;
+    case ModeInverse:
+      SetDrMd(myWindow->RPort,JAM2);
+      SetAPen(myWindow->RPort,current_background);
+      SetBPen(myWindow->RPort,current_foreground);
+      break;
     }
 
-  /* the diet chardraw routine - fast text output. */
-  
+  x=scalex[Coord->x];
+  y=scaley[Coord->y];
+
   for (i=0;i<count;++i)
-    {
-      a=*ch;
-      ++ch;
-      a+=offset;
-      p=&curfont[fontptr[a]];
-      
-      for (j=0;j<FONT_SIZE_Y;++j)
-  	{
-	  b=*p;
-
-  	  for (k=0;k<FONT_SIZE_X;++k)
-  	    {
-  	      if (b&0x80) /* check sign bit. */
-		{
-		  SetAPen(myWindow->RPort,mainColor);
-		  WritePixel(myWindow->RPort,x,y);
-		}
-
-	      ++x;
-  	      b<<=1;
-  	    }
-
-	  ++y;
-	  x-=width;
-	  ++p;
-  	}
-
-      x+=width;
-      y-=height;
-    }
-
-  return;
-
- chardraw_with_fries:
-  if (Rotate)
-    {
-      deltaX=-abs(deltaX);
-      width=-abs(width);
-      px=&y;
-      py=&x;
-    }
-    else
-    {
-      px=&x;
-      py=&y;
-    }
+    ch[i]+=offset;
   
-  if (ModeBold)
-    {
-      deltaX = deltaY = 2;
-      width<<=1;
-      height<<=1;
-    }
-  
-  for (i=0;i<count;++i)
-    {
-      a=*ch;
-      ++ch;
-      a+=offset;
-      p=&curfont[fontptr[a]];
-      for (j=0;j<FONT_SIZE_Y;++j)
-  	{
-  	  b=*p;
-
-	  if (Rotate)
-	    {
-	      px=&y;
-	      py=&x;
-	    }
-	  else
-	    {
-	      px=&x;
-	      py=&y;
-	    }
-
-  	  for (k=0;k<FONT_SIZE_X;++k)
-  	    {
-  	      if (b&0x80) /* check sign bit. */
-		{
-		  SetAPen(myWindow->RPort,mainColor);
-		  if (ModeBold)
-		    {
-		      WritePixel(myWindow->RPort,*px+1,*py);
-		      WritePixel(myWindow->RPort,*px,*py+1);
-		      WritePixel(myWindow->RPort,*px+1,*py+1);
-		    }
-		  WritePixel(myWindow->RPort,*px,*py);
-		}
-	      else
-		{
-		  if (CurMode==ModeInverse || CurMode==ModeRewrite)
-		    {
-		      SetAPen(myWindow->RPort,altColor);
-		      if (ModeBold)
-			{
-			  WritePixel(myWindow->RPort,*px+1,*py);
-			  WritePixel(myWindow->RPort,*px,*py+1);
-			  WritePixel(myWindow->RPort,*px+1,*py+1);
-			}
-		      WritePixel(myWindow->RPort,*px,*py); 
-		    }
-		}
-
-	      x += deltaX;
-  	      b<<=1;
-  	    }
-
-	  y+=deltaY;
-	  x-=width;
-	  ++p;
-  	}
-
-      Coord->x+=width;
-      x+=width;
-      y-=height;
-    }
-
-  return;
-
-  /* short offset; */
-  /* short x,y; */
-  /* unsigned char i=0; */
-  /* unsigned short choffset; */
-
-  /* switch(CurMem) */
-  /*   { */
-  /*   case M0: */
-  /*     bmGlyph->Planes[0]=(unsigned char*)font; */
-  /*     offset=-32; */
-  /*     break; */
-  /*   case M1: */
-  /*     bmGlyph->Planes[0]=(unsigned char*)font; */
-  /*     offset=64; */
-  /*     break; */
-  /*   case M2: */
-  /*     bmGlyph->Planes[0]=(unsigned char*)fontm23; */
-  /*     offset=-32; */
-  /*     break; */
-  /*   case M3: */
-  /*     bmGlyph->Planes[0]=(unsigned char*)fontm23; */
-  /*     offset=32; */
-  /*     break; */
-  /*   } */
-
-  /* switch(CurMode) */
-  /*   { */
-  /*   case ModeWrite: */
-  /*     break; */
-  /*   case ModeRewrite: */
-  /*     break; */
-  /*   case ModeErase: */
-  /*     break; */
-  /*   case ModeInverse: */
-  /*     break; */
-  /*   } */
-
-  /* x=scalex[Coord->x]; */
-  /* y=scaley[Coord->y]-12; */
-
-  /* for (i=0;i<count;i++) */
-  /*   { */
-  /*     choffset=fontptr[ch[i]+offset]; */
-  /*     bmGlyph->Planes[0]=(unsigned char*)font+choffset; */
-  /*     /\* BltBitMap(bmGlyph,0,0,myWindow->RPort->BitMap,x,y,8,12,0xC0,0xFF,NULL); *\/ */
-  /*     BltBitMapRastPort(bmGlyph,0,0,myWindow->RPort,x,y,8,12,0xC0); */
-  /*     x+=8; */
-  /*   } */
+  Move(myWindow->RPort,x,y);
+  Text(myWindow->RPort,ch,count);
 
 }
 
@@ -499,12 +323,6 @@ void screen_tty_char(padByte theChar)
  */
 unsigned char screen_dump_palette(void)
 {
-  /* unsigned char i; */
-  /* for (i=0;i<16;i++) */
-  /*   { */
-  /*     SetAPen(myWindow->RPort,i); */
-  /*     RectFill(myWindow->RPort,8*i,8,(8*i)+8,16); */
-  /*   } */
   SetAPen(myWindow->RPort,current_foreground);
 }
 
@@ -574,14 +392,12 @@ void screen_paint(padPt* Coord)
  */
 void screen_done(void)
 {
-  /* Free the text staging bitmap */
-  FreeRaster(bmText->Planes[0],TEXT_BITMAP_W,TEXT_BITMAP_H);
-  FreeMem(bmText,sizeof(struct BitMap));
-  FreeMem(bmGlyph,sizeof(struct BitMap));
-  /* since bmGlyph points to an already in memory raster that wasn't allocated, it is not freed. */
-  bmText=NULL;
-  bmGlyph=NULL;
+  if (platoFont)
+    CloseFont(platoFont);
 
+  if (platoUserFont)
+    CloseFont(platoUserFont);
+  
   if (myWindow)
     CloseWindow(myWindow);
   if (myScreen)

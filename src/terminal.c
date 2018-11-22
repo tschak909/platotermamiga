@@ -72,7 +72,7 @@ static unsigned char TAB_0_25[]={0,5,10,15,20,25};
 static unsigned char pix_cnt;
 static unsigned char curr_word;
 static unsigned char u,v;
-extern unsigned char fontm23[2048];
+unsigned char* fontm23;
 
 /**
  * Initialize terminal state
@@ -260,17 +260,17 @@ void terminal_char_load(padWord charNum, charData theChar)
 	    }
 	}
     }
-
-  fontm23[(charNum*12)+0]=char_data[0]<<8;
-  fontm23[(charNum*12)+1]=char_data[1]<<8;
-  fontm23[(charNum*12)+2]=char_data[2]|char_data[3]<<8;
-  fontm23[(charNum*12)+3]=char_data[4]<<8;
-  fontm23[(charNum*12)+4]=char_data[5]<<8;
-  fontm23[(charNum*12)+5]=char_data[6]|char_data[7]<<8;
-  fontm23[(charNum*12)+6]=char_data[8]<<8;
-  fontm23[(charNum*12)+7]=char_data[9]<<8;
-  fontm23[(charNum*12)+8]=char_data[10]|char_data[11]<<8;
-  fontm23[(charNum*12)+9]=char_data[12]<<8;
-  fontm23[(charNum*12)+10]=char_data[13]<<8;
-  fontm23[(charNum*12)+11]=char_data[14]|char_data[15]<<8;
+  
+  /* fontm23[(charNum*12)+0]=char_data[0]; */
+  /* fontm23[(charNum*12)+128]=char_data[1]; */
+  /* fontm23[(charNum*12)+256]=char_data[2]|char_data[3]; */
+  /* fontm23[(charNum*12)+384]=char_data[4]; */
+  /* fontm23[(charNum*12)+512]=char_data[5]; */
+  /* fontm23[(charNum*12)+640]=char_data[6]|char_data[7]; */
+  /* fontm23[(charNum*12)+768]=char_data[8]; */
+  /* fontm23[(charNum*12)+896]=char_data[9]; */
+  /* fontm23[(charNum*12)+1024]=char_data[10]|char_data[11]; */
+  /* fontm23[(charNum*12)+1152]=char_data[12]; */
+  /* fontm23[(charNum*12)+1280]=char_data[13]; */
+  /* fontm23[(charNum*12)+1408]=char_data[14]|char_data[15]; */
 }
