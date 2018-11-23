@@ -72,7 +72,7 @@ static unsigned char TAB_0_25[]={0,5,10,15,20,25};
 static unsigned char pix_cnt;
 static unsigned char curr_word;
 static unsigned char u,v;
-unsigned char* fontm23;
+extern unsigned char* fontm23;
 
 /**
  * Initialize terminal state
