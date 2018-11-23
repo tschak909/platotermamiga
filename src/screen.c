@@ -89,7 +89,7 @@ ULONG rassize;
 struct AreaInfo areainfo;
 UBYTE *areabuf;
 #define MAXVEC 80
-
+#define AREABUF_SIZE 8*MAXVEC
 /**
  * screen_init() - Set up the screen
  */
@@ -123,7 +123,7 @@ void screen_init(void)
     myWindow->RPort->TmpRas = &tmpras;
   }
   
-  if(areabuf = AllocMem(8*MAXVEC,MEMF_CLEAR))
+  if(areabuf = AllocMem(AREABUF_SIZE,MEMF_CLEAR))
   {
       InitArea(&areainfo,areabuf,MAXVEC);
       myWindow->RPort->AreaInfo = &areainfo;
@@ -425,6 +425,12 @@ void screen_done(void)
     CloseFont(platoUserFont);
   
   if (myWindow)
+    /* deallocate tmpras and areainfo */
+    myWindow->RPort->TmpRas = 0L;
+    FreeMem(tmpbuf,(long)rassize);
+    myWindow->RPort->AreaInfo = 0L;
+    FreeMem(areabuf,(long)AREABUF_SIZE);
+    /* Now we can safely close the window */  
     CloseWindow(myWindow);
   if (myScreen)
     CloseScreen(myScreen);
