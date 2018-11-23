@@ -88,7 +88,7 @@ UBYTE *tmpbuf;
 ULONG rassize;
 struct AreaInfo areainfo;
 UBYTE *areabuf;
-#define MAXVEC 400
+#define MAXVEC 80
 
 /**
  * screen_init() - Set up the screen
@@ -123,7 +123,7 @@ void screen_init(void)
     myWindow->RPort->TmpRas = &tmpras;
   }
   
-  if(areabuf = AllocMem(5*MAXVEC,MEMF_CLEAR))
+  if(areabuf = AllocMem(8*MAXVEC,MEMF_CLEAR))
   {
       InitArea(&areainfo,areabuf,MAXVEC);
       myWindow->RPort->AreaInfo = &areainfo;
