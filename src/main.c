@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "screen.h"
 #include "io.h"
+#include "sound.h"
 #include "terminal.h"
 #include "splash.h"
 #include "keyboard.h"
@@ -21,6 +22,7 @@ int main(void)
   screen_init();
   menu_init();
   io_init();
+  sound_init();
   touch_init();
   terminal_init();
   ShowPLATO(splash,sizeof(splash));
@@ -41,6 +43,7 @@ void done(void)
 {
   touch_done();
   io_done();
+  sound_done();
   screen_done();
   exit(0); /* TODO: add exit code? */
 }

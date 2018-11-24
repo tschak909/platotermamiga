@@ -1,0 +1,366 @@
+We have pulled in the scales program to serve as the base for a simple sound library. 
+You will find the original docs to it below. 
+
+
+
+Article 182 of net.micro.amiga:
+Relay-Version: version B 2.10.3 4.3bsd-beta 6/6/85; site unisoft.UUCP
+Posting-Version: version B 2.10.3 4.3bsd-beta 6/6/85; site well.UUCP
+Path: unisoft!lll-lcc!lll-crg!well!crunch
+From: crunch@well.UUCP (John Draper)
+Newsgroups: net.micro.amiga
+Subject: Sound Tutorial by Steven A. Bennett from BIX
+Message-ID: <467@well.UUCP>
+Date: 11 Jan 86 11:23:49 GMT
+Date-Received: 15 Jan 86 01:54:09 GMT
+Reply-To: crunch@well.UUCP (John Draper)
+Organization: Whole Earth 'Lectronic Link, Sausalito, CA
+Lines: 345
+
+A Discussion of Simple Audio Generation on the Amiga
+= ========== == ====== ===== ========== == === =====
+by Steven A. Bennett
+ 
+(permission is given to freely distribute this discussion and
+its associated source file, SCALES.C, as long as due credit is given)
+ 
+ 
+Introduction
+------------
+ 
+  Audio generation on the Amiga is not the easiest of tasks, but once
+one has the basic knowledge involved, it becomes no more than a matter
+of writing a good set of interface routines.  The Amiga can generate
+four channel sound through use of four DMA-driven Digital to Analog
+converters supplied on one of the custom chips. (Portia, I believe.)
+These channels can be used to generate music, speech, and sound effects
+with little processor overhead, in most cases.
+ 
+  In this discussion I will focus mainly on simple tone generation
+using several channels.  Also, I have uploaded a C source file called
+SCALES.C to the Listings conference here on BIX, and will be referencing
+sectons of code in it during the discussion.  It is suggested that you
+download this file as an example of the interface described below.
+ 
+  One further note -- My knowledge of the Audio device is based on the
+small section of the 1.0 ROM Manual which my dealer graciously allowed
+me to copy.  Thus, I may turn out to be incorrect on some of the non-Audio
+related areas of this discussion.  Since these are few, however, I feel able
+to upload this with little worry.
+ 
+ 
+The Audio Device
+--- ----- ------
+ 
+  In the back of the ROM Kernal Manual is a description of the subroutines
+available in the Audio Device.  Most of the information, while perhaps
+useful for some complicated tasks, is unnecessary for purposes of this
+discussion.  The routines which are needed here are listed below:
+ 
+               BeginIO()      - Begin an audio IO task
+                  CMD_WRITE      - Set waveform and begin audio output
+                  ADCMD_PERVOL   - Change period and volume
+                  ADCMD_FINISH   - Finish the current CMD_WRITE
+               OpenDevice()   - Open the audio device
+               WaitIO()       - Wait for the CMD_WRITE to finish
+ 
+The commands listed under BeginIO() are all that are needed for simple
+Audio output.  Required for all of these commands is the control structure,
+struct IOAudio.  It is defined in devices/audio.h.
+ 
+ 
+Preparing the Driver
+--------- --- ------
+ 
+  In order to use the Driver, one needs an IOAudio structure.  This should
+be public, and all unused fields zeroed out, hence we will allocate it
+using AllocMem():
+ 
+      struct IOAudio *ioa;
+ 
+      ioa = (struct IOAudio *)AllocMem(sizeof(*ioa) * NBR_IOA_STRUCTS,
+         MEMF_PUBLIC | MEMF_CLEAR);
+ 
+  NBR_IOA_STRUCTS is the total number of IOAudio structures used by this
+program.  Since most programs will need more than one, we can allocate them
+all at once.  As always, when performing an allocation, the return ought to
+be checked for an error.
+ 
+  Now we must open the Audio Device.  One of the items necessary for this
+process is a ReplyPort.  Later on, we will need several more.  (NOTE - this
+area is the shakiest one in this program, as I have determined the use of
+CreatePort from other programs and lots of guesswork)
+ 
+      ioa->ioa_Request.io_Message.mn_ReplyPort =
+         CreatePort("Audio one", 0);
+ 
+  After we have the ReplyPort, we have to set the other variables for the
+OpenDevice.  Here, we wish to allocate the channels (which can also be done
+later, using ADCMD_ALLOCATE, in which case we don't even need the ReplyPort,
+but it is far easier to do it here.) which will be used for output.  For
+this process, we need an allocation maps.  This is an array of bytes, each
+of which contains a bit map for the channels to be requested.  The four
+channels are represented by the lowest four bits in each byte.  Thus, if
+we wanted a map which would allocate any combination of two channels, our
+map might look like this:
+ 
+      UBYTE aMap[] = { 0x03, 0x05, 0x09, 0x06, 0x0A, 0x0C };
+ 
+which is all the combinations of two bits in the lowest four.  But for this
+example we simply want all four, so our map looks like this:
+ 
+      UBYTE aMap[] = { 0x0f };
+ 
+Now we can open the Audio Device:
+ 
+      /* ln_Pri is the priority of the allocation request.
+       * if channels are in use, and ln_Pri is higher than the
+       * priority of the channel already in use, it will steal
+       * the channel(s) if it can't otherwise allocate them
+       * legally.  See ADCMD_ALLOCATE for more information on this.
+       */
+      ioa->ioa_Request.io_Message.mn_Node.ln_Pri = 10;
+      ioa->ioa_Data = aMap;
+      ioa->ioa_Length = sizeof(aMap);
+      error = OpenDevice(AUDIONAME, 0, ioa, 0);
+ 
+If there was no error, then ioa->ioa_Request.io_Unit will be a bitmap
+of the successfully allocated channels.  When allocating less than four
+channels, one might need to look at this value to see exactly which
+channels it is legal to use.  An observant C programmer might notice that
+io_Unit is a pointer (as does the C compiler, itself).  Nevertheless, it
+is actually used as a bitmap, and warnings generated by the compiler on
+this point should be ignored.
+ 
+  Now, given the opened device, one must initialize the rest of the IOAudio
+structures to be used by the program.  Since structure assignment in indeed
+implemented in the Lattice compiler (and probably the Aztec, but I can't be
+certain), this is easily accomplished.  The reason we must set each struct
+equal to the IOAudio struct returned by the OpenDevice is to copy the
+Device code and allocation code to the new structure.  If this is not done,
+then any command using the uninitialized structure will fail.
+ 
+      finishioa = &ioa[1];  /* Remember the AllocMem()? */
+      *finishioa = *ioa;
+ 
+  One absolutely must have one IOAudio structure per voice which will be
+playing simultaneously.  This is because the CMD_WRITE command is
+asyncronous, and once it has been started, the IOAudio structure is
+supposed to be left untouched.  For purposes of quick change, I am using
+two structures per voice.  All of these structures must have their own
+ReplyPorts, as well.
+ 
+  One also needs at least one IOAudio structure for the synchronous
+commands ADCMD_PERVOL and ADCMD_FINISH.  I am using seperate structures
+for these two, again for speed.
+ 
+  To see an example of initialization of these structures, examine
+the routine InitIOA() in SCALES.C.
+ 
+ 
+Generating a tone
+---------- - ----
+ 
+  In order to generate a tone, one needs several things.  A waveform array,
+usually in a length which is a power of two.  A period, which is calculated
+from the frequency of the tone and the length of the waveform array.  A
+volume and a duration.  And an initialized IOAudio structure.
+ 
+  First, we'll determine the period.  This must be an integer between
+127 and 65535, although best results occur between 127 and 500, due to
+the anti-aliasing filter.  (At 500, the sampling rate is only about
+7150 times per second, and that is getting slow.  I could even conceive
+of an overtone being produced if one gets much higher.)  The period is
+taken from the formula:
+ 
+            P = C/(WF)
+ 
+where P is the period, C is the clock rate (in this case, 3579545), W is
+the length of the waveform array, and F is the frequency in hz.  Thus for
+a middle A (440 hz) with, say, a 32 byte long waveform array, the period
+would be:
+ 
+            P = 3579545 / (32 * 440)
+              = 3579545 / 14080
+              = 254.229
+ 
+Since we require an integer, this would become 254.  For those of you who
+haven't yet burned your ABASIC manuals, there is a table of period values
+on page R-138.  For the sample program, we are using period values between
+428 and 226, so that our octaves start with C.  This has the advantage of
+lowering frequency error to about .22%, but the disadvantage of being
+unable to hit the highest notes.  If one can accept a frequency error of
+up to .39%, then the range of 240 to 127 could be used.  (For those of
+you wondering what those percentages come out to, its about a twentieth
+of a step for the former, and a tenth of a step for the latter.)
+ 
+But how can we change octaves?  By doubling or halving the length of the
+waveform array.  So now we turn to waveforms.
+ 
+A waveform array describes one cycle of a tone.  It can be simple (ie.,
+BYTE wfarray[2] = {127, -127}; which is a square wave) or it can be
+complex, involving complex transformations using harmonics.  In our
+sample program, we use a simple sawtooth wave, which is simply a ramp
+from the lowest value to the highest, then suddenly dropping to the lowest
+and beginning again.  The length of the waveform array determines the
+octave.  Since middle A (fourth octave) uses a waveform array length of
+32, we can get the following size table for the various octaves:
+ 
+               Octave 0 (lowest) = 512
+                        Octave 1 = 256
+                        Octave 2 = 128
+                        Octave 3 = 64
+                        Octave 4 = 32
+                        Octave 5 = 16
+                        Octave 6 = 8
+                        Octave 7 = 4
+                        Octave 8 = 2
+                        Octave 9 = 1    (this is impossible)
+ 
+Because a sawtooth is a naturally rough wave, Octave 0 would sound pretty
+badly, therefore we will not use it for now.  Octave 9 is impossible for
+the period range we have chosen, although some of that octave could be
+played if we used the lower period range mentioned earlier.  It is
+impossible because we need at a minimum 2 samples to make a waveform.
+Octave 8 is currently ignored for this program because the expansion
+algorithm used would not produce an acceptable 2 byte waveform.
+ 
+  Therefore, we create a basic, 256 byte, sawtooth wave.  The routine
+setwave() in SCALES.C performs this function well.  It is better
+if the wave can begin and end at the zero point, allowing for less chance
+of click when a note is changed.  A flag (ADIOF_SYNCCYCLE) can be used with
+the ADCMD_FINISH command to end the CMD_WRITE in progress at the end of the
+currently playing cycle to aid in this, but is unnecessary for our example.
+ 
+  We must then expand that waveform to several waveforms of decreasing
+length, as set in the table of lengths above.  This is accomplished with
+the routine xpandwave().  The routine makewaves() will allocate memory for
+the wave and call both.  And here we come to an important point.
+ 
+  The waveform array MUST be in chip memory!  Either it can be kept there
+at all times, or copied there just before use.  Do NOT assume that your
+program will reside in chip memory and ignore this requirement, for sooner
+or later you will be burnt!  Furthermore, I will make an educated guess that
+the waveform array should not be modified while in use.  I suspect that the
+CMD_WRITE command simply sets registers in the chip (at least, I hope that
+is what it does!) and that modifying the waveform while in use may cause
+unusual results.
+ 
+  Finally, now that we have our period and our waveforms, we can make a
+tone.  To do this we need to set several entries in a currently unused
+IOAudio structure:
+ 
+      freeioa->ioa_Request.io_Command = CMD_WRITE;
+      freeioa->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
+      freeioa->ioa_Request.io_Unit = unitno;
+ 
+      freeioa->ioa_Period = period;
+      freeioa->ioa_Volume = 32;            /* between 0 and 64 */
+      freeioa->ioa_Data = waveform_ptr;
+      freeioa->ioa_Length = waveform_len;
+ 
+      freeioa->ioa_Cycles = 0;
+ 
+This assumes that we have already copied the OpenDevice info into it and
+have created a unique ReplyPort for it.  In our sample program, this would
+be an array.  CMD_WRITE is the command to set waveform and begin audio
+generation.  The flag ADIOD_PERVOL says to set period and volume as well.
+The flag IOF_QUICK is a flag telling to perform this as quickly as
+possible.  It is used here to make CMD_WRITE synchronous in case of an
+error.  The variable unitno is a bitmap for the channel(s) for which
+to play the tone.  (1 for channel 1, 2 for channel 2, 4 for channel 3, and
+8 for channel 4, or any combination thereof.)  ioa_Cycles is the number of
+cycles which the tone will play for.  If set to zero, the tone will play
+continuously until aborted by AbortIO() or by an ADCMD_FINISH command.  The
+latter is recommended.
+ 
+  Since we set ioa_Cycles to zero, we must consider the possibility that
+the audio channel we wish to use is already playing a tone.  A flag should
+be kept concerning this fact.  If a tone is already playing, we must stop
+it first, which requires an ADCMD_FINISH command to be issued.  The
+finishioa structure does not need a ReplyPort, as ADCMD_FINISH is
+synchronous.  This initialization, with the exception of the unitno,
+can be done once, with our main initialization, but is shown here for
+clarity.
+ 
+   if (waiting[voice])
+      {
+      finishioa->ioa_Request.io_Command = ADCMD_FINISH;
+      finishioa->ioa_Request.io_Flags = IOF_QUICK;
+      finishioa->ioa_Request.io_Unit = unitno;
+      BeginIO(finishioa);
+      WaitIO(ioainuse);
+      waiting[voice] = NO;
+      }
+ 
+ioainuse is the IOAudio structure which was used for the previous
+CMD_WRITE on this channel.  After it has been told to finish, it sends a
+message that it has done so to the ReplyPort specified in it.  WaitIO()
+waits until this message has been received, and then continues.
+ 
+  Finally we can start our tone.  This is simply done, by:
+ 
+   BeginIO(freeioa);
+   error = CheckIO(freeioa);
+   if (error)
+      <do error recovery>
+   else
+      waiting[voice] = YES;
+ 
+In our sample program, we then swap the freeioa and ioainuse pointers, so
+that we can easily use the same code for the next tone.  All of this code
+is in setwpv() in SCALES.C for your perusal.
+ 
+All that remains is a routine which will select the waveform to be used and
+the period, and this can be a table lookup.  To make things easier on the
+driver, however, we can make a simple routine which will just change the
+period if the waveform does not change.  This routine, which can also
+control the volume, can be used whenever the octave is the same, and can
+come in handy later should we desire envelope control or vibrato:
+ 
+   ioapv->ioa_Request.io_Command = ADIOF_PERVOL;
+   ioapv->ioa_Request.io_Flags = IOF_QUICK;
+   ioapv->ioa_Request.io_Unit = unitno;
+ 
+   ioapv->ioa_Period = period;
+   ioapv->ioa_Volume = 32;
+   BeginIO(ioapv);
+ 
+Since ADCMD_PERVOL is synchronous, it requires no wait and no ReplyPort.
+This should only be used if a CMD_WRITE on the given unitno is in progress.
+If not, I have no idea as to the results.
+ 
+  The waveform and period select routine, which also decides if it can
+use the ADCMD_PERVOL code, is called strike() in SCALES.C.  It also
+handles "rests" by shutting the volume down to zero.  For determining
+durations of notes, one can use the Delay() function, although for
+serious music generation, I would suggest the microhz timer instead.
+ 
+ 
+Cleaning up
+-------- --
+ 
+  When your program ends, it is always important to free up the allocated
+memory, the ReplyPorts, and the device.  For simplicity, I am using the
+FinishProg() routine in SCALES.C.  If you don't do it, nobody will.
+ 
+  If you are still confused, examine SCALES.C, where all this stuff is
+used in a working application.  All subroutines in there can be used by
+anyone who wants to.
+ 
+Other applications
+----- ------------
+ 
+  There are many other uses for the audio routines.  Digitized sound could
+be used in place of a waveform for interesting effects, although the period
+would most likely require change.  Sound effects could be created by quickly
+changing period and waveform and volume.  Supposedly, one can link pairs of
+channels for modulation, but I have no idea as to how to do it.  And speech
+can be generated, but not with these routines.  Have fun!
+ 
+S. A. Bennett
+12/31/85
+===End of Discussion===
+ 
+
+
