@@ -78,6 +78,18 @@ struct TextAttr platouser_ta = {"PLATOUser.font",12,0,0};
 struct TextFont* platoFont;
 struct TextFont* platoUserFont;
 
+/* All of this is needed if we don't want area fills that are slower than
+ * grandma on Nyquil. 
+ * The TLDR; is the RastPort needs some scratch space for certain graphics
+ * primitives to work well.
+ */
+struct TmpRas tmpras;
+UBYTE *tmpbuf;
+ULONG rassize;
+struct AreaInfo areainfo;
+UBYTE *areabuf;
+#define MAXVEC 80
+#define AREABUF_SIZE 8*MAXVEC
 /**
  * screen_init() - Set up the screen
  */
@@ -103,7 +115,21 @@ void screen_init(void)
 
   if (!myWindow)
     done();
+  /* Initilize scratch space for area fill primitives */
+  rassize = RASSIZE(myWindow->GZZWidth,myWindow->GZZHeight);
+  if(tmpbuf = AllocMem(rassize,MEMF_CHIP|MEMF_CLEAR))
+  {
+    InitTmpRas(&tmpras,tmpbuf,rassize);
+    myWindow->RPort->TmpRas = &tmpras;
+  }
+  
+  if(areabuf = AllocMem(AREABUF_SIZE,MEMF_CLEAR))
+  {
+      InitArea(&areainfo,areabuf,MAXVEC);
+      myWindow->RPort->AreaInfo = &areainfo;
+  }
 
+  /* end of scratch space init XXX! add error checking */
   platoFont=OpenDiskFont(&plato_ta);
 
   if (!platoFont)
@@ -399,6 +425,12 @@ void screen_done(void)
     CloseFont(platoUserFont);
   
   if (myWindow)
+    /* deallocate tmpras and areainfo */
+    myWindow->RPort->TmpRas = 0L;
+    FreeMem(tmpbuf,(long)rassize);
+    myWindow->RPort->AreaInfo = 0L;
+    FreeMem(areabuf,(long)AREABUF_SIZE);
+    /* Now we can safely close the window */  
     CloseWindow(myWindow);
   if (myScreen)
     CloseScreen(myScreen);
