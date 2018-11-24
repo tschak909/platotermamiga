@@ -20,6 +20,7 @@
 #include <clib/diskfont_protos.h>
 #include <clib/alib_stdio_protos.h>
 #include "io.h"
+#include "sound.h"
 #include "terminal.h"
 #include "screen.h"
 #include "protocol.h"
@@ -184,6 +185,7 @@ void screen_wait(void)
  */
 void screen_beep(void)
 {
+    sound_beeper();
 }
 
 /**
