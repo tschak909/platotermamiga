@@ -71,6 +71,11 @@ void screen_cycle_border_back(void);
 void screen_update_colors(void);
 
 /**
+ * screen_update_title() - Update window/screen title
+ */
+void screen_update_title(void);
+
+/**
  * screen_wait(void) - Sleep for approx 16.67ms
  */
 void screen_wait(void);

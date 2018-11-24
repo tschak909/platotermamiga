@@ -119,4 +119,10 @@ padByte terminal_ext_in(void);
  */
 void terminal_ext_out(padByte value);
 
+/**
+ * terminal_status - Indicate whether we are in TTY or PLATO
+ * mode for the status display.
+ */
+char* terminal_status(void);
+
 #endif

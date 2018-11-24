@@ -13,6 +13,7 @@
 
 #include "keyboard.h"
 #include "protocol.h"
+#include "screen.h"
 #include "io.h"
 #include "key.h"
 #include "menu.h"
@@ -87,6 +88,11 @@ void keyboard_main(void)
 	    keyboard_out(key_to_pkey[intuition_msg->Code]);
 	  
 	  ReplyMsg((struct Message *)intuition_msg);
+	}
+      /* Handle window active/inactive */
+      if (intuition_msg->Class==IDCMP_ACTIVEWINDOW)
+	{
+	  screen_update_title();
 	}
       /* handle menu selection messages */
       if (intuition_msg->Class == IDCMP_MENUPICK) {

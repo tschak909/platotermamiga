@@ -32,6 +32,21 @@ void io_init(void);
 void io_send_byte(unsigned char b);
 
 /**
+ * io_status_baud(void) - Return current baud rate.
+ */
+int io_status_baud(void);
+
+/**
+ * io_status_rbuflen(void) - Return serial buffer length
+ */
+unsigned long io_status_rbuflen(void);
+
+/**
+ * io_status_flags(void) - Return serial flags
+ */
+char* io_status_serflags(void);
+
+/**
  * io_main() - The IO main loop
  */
 void io_main(void);

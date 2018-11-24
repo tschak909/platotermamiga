@@ -61,6 +61,7 @@ extern void screen_tty_char(padByte theChar);
 extern void screen_foreground(padRGB* theColor);
 extern void screen_background(padRGB* theColor);
 extern void screen_paint(padPt* Coord);
+extern void screen_update_title(void);
 extern void terminal_mem_load(padWord addr, padWord value);
 extern void terminal_char_load(padWord charnum, charData theChar);
 extern void terminal_mode_5(padWord value);
@@ -152,6 +153,7 @@ InitTTY (void)
   FastText = true;
   FlowControl = false;
   terminal_set_tty();
+  screen_update_title();
 }
 
 void
@@ -184,6 +186,7 @@ InitPLATOx (void)
   FastText = true;
   CurMem = M0;
   CurMode = ModeRewrite;
+  screen_update_title();
 }
 
 

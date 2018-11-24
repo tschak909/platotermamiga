@@ -274,3 +274,15 @@ void terminal_char_load(padWord charNum, charData theChar)
   /* fontm23[(charNum*12)+1280]=char_data[13]; */
   /* fontm23[(charNum*12)+1408]=char_data[14]|char_data[15]; */
 }
+
+/**
+ * terminal_status - Indicate whether we are in TTY or PLATO
+ * mode for the status display.
+ */
+char* terminal_status(void)
+{
+  if (TTY)
+    return "TTY  ";
+  else
+    return "PLATO";
+}

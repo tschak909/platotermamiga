@@ -82,6 +82,41 @@ void io_send_byte(unsigned char b)
 }
 
 /**
+ * io_status_baud(void) - Return current baud rate.
+ */
+int io_status_baud(void)
+{
+  return ms->readio->io_Baud;
+}
+
+/**
+ * io_status_flags(void) - Return serial flags
+ */
+char* io_status_serflags(void)
+{
+  if (ms->readio->io_SerFlags & SERF_7WIRE)
+    {
+      return "RTS/CTS ";
+    }
+  else if (ms->readio->io_SerFlags & (SERF_XDISABLED==0))
+    {
+      return "XON/XOFF";
+    }
+  else
+    {
+      return "NONE    ";
+    }
+}
+
+/**
+ * io_status_rbuflen(void) - Return serial buffer length
+ */
+unsigned long io_status_rbuflen(void)
+{
+  return ms->readio->io_RBufLen;
+}
+
+/**
  * io_main() - The IO main loop
  */
 void io_main(void)

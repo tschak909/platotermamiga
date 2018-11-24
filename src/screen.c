@@ -18,6 +18,9 @@
 #include <graphics/gfxmacros.h>
 #include <graphics/text.h>
 #include <clib/diskfont_protos.h>
+#include <clib/alib_stdio_protos.h>
+#include "io.h"
+#include "terminal.h"
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
@@ -157,6 +160,16 @@ void screen_update_colors(void)
       unsigned long b=palette[i].blue  >> 4;
       SetRGB4(&myScreen->ViewPort,i,r,g,b);
     }
+}
+
+/**
+ * screen_update_title() - Update window/screen title
+ */
+void screen_update_title(void)
+{
+  char title[128];
+  sprintf(title,"PLATOTerm | %6ld | N81 | %s | %s | Recv Buf Len: %6ld",io_status_baud(),io_status_serflags(),terminal_status(),io_status_rbuflen());
+  SetWindowTitles(myWindow,title,title);
 }
 
 /**
