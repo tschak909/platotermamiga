@@ -101,7 +101,7 @@ void keyboard_main(void)
           itemNum = ITEMNUM(menuNumber);
           subNum = SUBNUM(menuNumber);
           while(menuNumber != MENUNULL) {
-              item = ItemAddress(&menu1,menuNumber); 
+              item = ItemAddress(&menuTerminal,menuNumber); 
             if(menuNum == 0 && itemNum == 0 && subNum == 31)
             {
                 done();
