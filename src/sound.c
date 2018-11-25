@@ -27,6 +27,15 @@
 #undef NULL
 #define NULL 0L
 
+/* This macro is used to bail out if we think there is a problem setting up the sound
+ * without killing platoterm. 
+ * This should be called before we interact with the sound device in the
+ * the beginning of most calls. but espescally anywhere after FinishedSound
+ * might have been called this is because most of the error handling as currently
+ * written assumes FinishedSound never returns (original exited the program) 
+ */
+#define CHECK_FAULT if(sound_fault) return;
+
 #define  PRIORITY          10L    /* Priority for Audio Channel usage */
 #define  NBR_IOA_STRUCTS   10L    /* Number of IOAudio structures used */
 #define  PV_IOA_STRUCT     0L     /* index to ioapv struct */
@@ -39,7 +48,7 @@
  
 /* function protos */
 void FinishSound(int finishcode); /* Internal use only, keep out of sound.h */
-
+int sound_fault = 0;            /* when this variable is 1 all sound calls are no-ops */
 UBYTE aMap[] = { 0x0f };                  /* allocate four channels */
 long  voiceMap[] = { 1, 2, 4, 8 };
 struct IOAudio *ioa, *finishioa, *ioapv;
@@ -83,6 +92,12 @@ char *portstring[] = {
  * unique ReplyPort (or so I think).  The IOAudio structure used to
  * Open the Device must also have a ReplyPort, but it may not have to be
  * unique.  I am taking no chances, however.
+ *
+ * The original scales program called FinishedProgram(now called FinishedSound) 
+ * which would  exit the program. We don't want to exit so a macro named
+ * CHECK_FAULT was created. it needs to be called after any place where
+ * FinishedSound could have been called so we get the same effect as if
+ * FinishedSound never returned.
  */
  
 void InitIOA()
@@ -95,6 +110,7 @@ void InitIOA()
       MEMF_PUBLIC | MEMF_CLEAR);
    if (ioa == NULL)
       FinishSound(1);
+   CHECK_FAULT /* Failed above? bail out */
  
    /* set the various IOAudio structure pointers
     */
@@ -118,12 +134,13 @@ void InitIOA()
       CreatePort("Audio zero", 0L);
    if (ioa->ioa_Request.io_Message.mn_ReplyPort == NULL)
       FinishSound(2);
+   CHECK_FAULT /* failed above? bail out. */
    ioa->ioa_Data = aMap;
    ioa->ioa_Length = (long)sizeof(aMap);
    error = OpenDevice(AUDIONAME, 0L,(struct IORequest *) ioa, 0L);
    if (error)
       FinishSound(3);
- 
+   CHECK_FAULT  /* failed above? bail out */
    /* setup the finishioa and ioapv structs.  The IOF_QUICK flag
     * makes them synchronous in all cases.
     */
@@ -153,6 +170,7 @@ void InitIOA()
       if (freeioa[i]->ioa_Request.io_Message.mn_ReplyPort == NULL ||
          ioainuse[i]->ioa_Request.io_Message.mn_ReplyPort == NULL)
          FinishSound(4);
+      CHECK_FAULT /* failed above? bail out */
    }
  
 /* FinishSound(finishcode)
@@ -183,7 +201,6 @@ char *errormsgs[] = {
 void FinishSound(int finishcode)
    {
    int i;
- 
    printf(errormsgs[finishcode]);
    switch(finishcode)
       {
@@ -222,9 +239,7 @@ void FinishSound(int finishcode)
       FreeMem(ioa, (NBR_IOA_STRUCTS * (long)sizeof(*ioa)));
  
       }
-   if (finishcode)
-      exit(1L);
-   exit(0L);
+   sound_fault = 1;
    }
  
 /* setwpv()
@@ -245,7 +260,7 @@ void FinishSound(int finishcode)
 void setwpv(char *wf,int len, int  per,int  vol,int voice)
    {
    struct IOAudio *tmpioa;
- 
+    CHECK_FAULT 
    /* the next three lines are probably unnecessary and can be
     * done instead in InitIOA, but why take chances?
     */
@@ -344,6 +359,7 @@ void setwpv(char *wf,int len, int  per,int  vol,int voice)
 void setpv(per, vol)
    int per, vol;
    {
+   CHECK_FAULT
    ioapv->ioa_Period = per;
    ioapv->ioa_Volume = vol;
    ioapv->ioa_Request.io_Unit = (struct Unit *)unitno;
@@ -360,6 +376,7 @@ void setpv(per, vol)
 void StopVoices()
    {
    int voice;
+   CHECK_FAULT
  
    for (voice = 0; voice < 4; ++voice)
       {
@@ -402,7 +419,7 @@ void setwave(wfp)
    UBYTE *wfp;          /* This is a sneaky way of making a sawtooth */
    {
    int i;
- 
+   CHECK_FAULT 
    for (i = 0; i < BIG_WAVE; ++i)
       wfp[i] = i;
    }
@@ -429,7 +446,7 @@ void xpandwave(wfp)
    {
    int i, j, rate;
    BYTE *tptr;
- 
+   CHECK_FAULT 
    rate = 1;
    tptr = wfp + BIG_WAVE;
    for (i = 0; i < NBR_WAVES - 1; ++i)
@@ -452,6 +469,7 @@ void makewaves()
    /* allocate the memory for the waveform.
     */
    wptr = (BYTE *)AllocMem(WAVES_TOTAL, MEMF_CHIP);
+   CHECK_FAULT
    if (wptr == NULL)
       FinishSound(5);
  
@@ -478,7 +496,7 @@ void strike(int note,int  voice)
    {
    int per, oct, len;
    BYTE *wfp;
- 
+   CHECK_FAULT
    unitno = voiceMap[voice];
    if (note >= 100)           /* play a rest. */
       {
@@ -511,6 +529,7 @@ void sound_init() {
  * sound device and memory 
  */
 void sound_done() {
+    CHECK_FAULT     /* if we errored out we already attempted cleanup earlier */
     restall();      /* Silence all voices */
     StopVoices();   /* turn off all channels and abort pending IO */
     FinishSound(0); /* close device, free memory */
@@ -521,6 +540,7 @@ void sound_done() {
 void sound_beeper()
 {
    int i;
+   CHECK_FAULT
    strike(60,0);
    Delay(20L);
    restall();
