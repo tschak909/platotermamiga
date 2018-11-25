@@ -89,7 +89,7 @@ void terminal_init(void)
 void terminal_initial_position(void)
 {
   TTYLoc.x=0;
-  TTYLoc.y=100;
+  TTYLoc.y=320;
 }
 
 /**

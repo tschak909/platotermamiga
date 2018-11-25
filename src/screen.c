@@ -189,12 +189,33 @@ void screen_beep(void)
 }
 
 /**
+ * screen_clear_palette - Clear the palette
+ */
+void screen_clear_palette(void)
+{
+  int i;
+  for (i=0;i<16;i++)
+    {
+      palette[i].red=0;
+      palette[i].green=0;
+      palette[i].blue=0;
+    }
+
+  /* Set complement color of 1 for HIGHCOMP */
+  /* so menu texts are visible. */
+  palette[15].red=255;
+  palette[15].green=255;
+  palette[15].blue=255;
+}
+
+/**
  * screen_clear - Clear the screen
  */
 void screen_clear(void)
 {
-  SetRast(myWindow->RPort,current_background);
   highest_color_index=0;
+  screen_clear_palette();
+
   palette[0].red=current_background_rgb.red;
   palette[0].green=current_background_rgb.green;
   palette[0].blue=current_background_rgb.blue;
@@ -210,6 +231,7 @@ void screen_clear(void)
     }
 
   screen_update_colors();
+  SetRast(myWindow->RPort,current_background);
 }
 
 /**
