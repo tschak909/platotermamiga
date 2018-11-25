@@ -20,6 +20,7 @@
 #define PEN_TEXT_BG    0
 #define PEN_TEXT_FG    1
 
+extern struct Window *myWindow; /* screen.c */
 
 /**
  * Baud Menu
@@ -138,8 +139,20 @@ struct Menu menuEdit =
 struct Menu menuTerminal = 
   { &menuEdit, 0, 0, 72, HEIGHT_ITEM, MENUENABLED, "Terminal", &itemPLATOMode, 0, 0, 0, 0    };
 
+/**
+ * toggle PLATO mode checkbox
+ */
+void menu_toggle_plato_mode(unsigned char toggle)
+{
+  /* ClearMenuStrip(myWindow); */
+  /* if (toggle==1) */
+  /*   itemPLATOMode.Flags|=CHECKED; */
+  /* else */
+  /*   itemPLATOMode.Flags&=CHECKED; */
+  /* SetMenuStrip(myWindow,&menuTerminal); */
+}
+
 /* Add our menu to the menustrip */
 void menu_init() {
-  extern struct Window *myWindow;
   SetMenuStrip(myWindow,&menuTerminal);
 }

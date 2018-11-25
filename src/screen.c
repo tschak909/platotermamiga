@@ -17,6 +17,7 @@
 #include <exec/memory.h>
 #include <graphics/gfxmacros.h>
 #include <graphics/text.h>
+#include <clib/macros.h>
 #include <clib/diskfont_protos.h>
 #include <clib/alib_stdio_protos.h>
 #include "io.h"
@@ -44,6 +45,9 @@ ULONG* fontm23;
 unsigned char is_mono=0;
 unsigned char highest_color_index=0;
 padRGB palette[16];
+
+#define MAX(a,b)    ((a)>(b)?(a):(b))
+#define MIN(a,b)    ((a)<(b)?(a):(b))
 
 extern void done(void);
 
@@ -252,10 +256,10 @@ void screen_block_draw(padPt* Coord1, padPt* Coord2)
 {
   screen_set_pen_mode();
   RectFill(myWindow->RPort,
-	   scalex[Coord1->x],
-	   scaley[Coord1->y],
-	   scalex[Coord2->x],
-	   scaley[Coord2->y]);
+	   MIN(scalex[Coord1->x],scalex[Coord2->x]),
+	   MIN(scaley[Coord1->y],scaley[Coord2->y]),
+	   MAX(scalex[Coord2->x],scalex[Coord1->x]),
+	   MAX(scaley[Coord2->y],scaley[Coord1->y]));
 }
 
 /**
@@ -301,12 +305,10 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
       break;
     case M2:
       SetFont(myWindow->RPort,platoUserFont);
-      // offset=0;
       offset=-32;
       break;
     case M3:
       SetFont(myWindow->RPort,platoUserFont);
-      // offset=64;
       offset=32;
       break;
     }
@@ -349,6 +351,8 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
  */
 void screen_tty_char(padByte theChar)
 {
+  padPt Coord1,Coord2;
+  
   if ((theChar >= 0x20) && (theChar < 0x7F)) {
     screen_char_draw(&TTYLoc, &theChar, 1);
     TTYLoc.x += CharWide;
@@ -359,9 +363,14 @@ void screen_tty_char(padByte theChar)
     }
   else if ((theChar == 0x08) && (TTYLoc.x > 7))	/* backspace */
     {
-      TTYLoc.x -= CharWide;
-
-      // Implement backspace.
+      /* /\* SetAPen(myWindow->RPort,current_background); *\/ */
+      /* TTYLoc.x -= CharWide; */
+      /* RectFill(myWindow->RPort, */
+      /* 	       MIN(scalex[TTYLoc.x],scalex[TTYLoc.x+CharWide]), */
+      /* 	       MIN(scaley[TTYLoc.y],scaley[TTYLoc.y+CharHigh]), */
+      /* 	       MAX(scalex[TTYLoc.x+CharWide],scalex[TTYLoc.x]), */
+      /* 	       MAX(scaley[TTYLoc.y+CharHigh],scaley[TTYLoc.y])); */
+      /* /\* SetAPen(myWindow->RPort,current_foreground); *\/ */
     }
   else if (theChar == 0x0A)			/* line feed */
     TTYLoc.y -= CharHigh;

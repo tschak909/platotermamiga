@@ -108,7 +108,10 @@ void keyboard_main(void)
 	      }
 	    else if (menuNum==0&&itemNum==0&&subNum==31)
 	      {
-		
+		if (TTY==padT)
+		  InitPLATO();
+		else
+		  InitTTY();
 	      }
             menuNumber = item->NextSelect;
           }

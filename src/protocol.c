@@ -75,6 +75,7 @@ extern void terminal_ext_out(padByte value);
 extern void screen_clear(void);
 extern void terminal_set_tty(void);
 extern void terminal_set_plato(void);
+extern void menu_toggle_plato_mode(unsigned char toggle);
 
 #ifdef PROTOCOL_DEBUG
 extern void log(const char* format, ...);
@@ -154,6 +155,7 @@ InitTTY (void)
   FlowControl = false;
   terminal_set_tty();
   screen_update_title();
+  menu_toggle_plato_mode(0);
 }
 
 void
@@ -187,6 +189,7 @@ InitPLATOx (void)
   CurMem = M0;
   CurMode = ModeRewrite;
   screen_update_title();
+  menu_toggle_plato_mode(0);
 }
 
 
