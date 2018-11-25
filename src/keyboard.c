@@ -90,7 +90,7 @@ void keyboard_main(void)
 	  ReplyMsg((struct Message *)intuition_msg);
 	}
       /* Handle window active/inactive */
-      if (intuition_msg->Class==IDCMP_ACTIVEWINDOW)
+      if (intuition_msg->Class==IDCMP_ACTIVEWINDOW || intuition_msg->Class==IDCMP_INACTIVEWINDOW)
 	{
 	  screen_update_title();
 	}
@@ -102,10 +102,14 @@ void keyboard_main(void)
           subNum = SUBNUM(menuNumber);
           while(menuNumber != MENUNULL) {
               item = ItemAddress(&menuTerminal,menuNumber); 
-            if(menuNum == 0 && itemNum == 0 && subNum == 31)
-            {
+            if(menuNum == 0 && itemNum == 2 && subNum == 31)
+	      {
                 done();
-            }
+	      }
+	    else if (menuNum==0&&itemNum==0&&subNum==31)
+	      {
+		
+	      }
             menuNumber = item->NextSelect;
           }
           ReplyMsg((struct Message *)intuition_msg);
