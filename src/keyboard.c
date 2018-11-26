@@ -90,12 +90,12 @@ void keyboard_main(void)
 	  ReplyMsg((struct Message *)intuition_msg);
 	}
       /* Handle window active/inactive */
-      if (intuition_msg->Class==IDCMP_ACTIVEWINDOW || intuition_msg->Class==IDCMP_INACTIVEWINDOW)
+      else if (intuition_msg->Class==IDCMP_ACTIVEWINDOW || intuition_msg->Class==IDCMP_INACTIVEWINDOW)
 	{
 	  screen_update_title();
 	}
       /* handle menu selection messages */
-      if (intuition_msg->Class == IDCMP_MENUPICK) {
+      else if (intuition_msg->Class == IDCMP_MENUPICK) {
           menuNumber = intuition_msg->Code;
           menuNum = MENUNUM(menuNumber);
           itemNum = ITEMNUM(menuNumber);
