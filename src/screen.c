@@ -112,7 +112,7 @@ void screen_init(void)
    * chipram we have available. so we can do things like close the workbench */
   chipram = AvailMem(MEMF_CHIP|MEMF_LARGEST);
   if(chipram <= 319136){
-      lowmem_flag = 1
+      lowmem_flag = 1;
   }
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
 
