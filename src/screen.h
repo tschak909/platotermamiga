@@ -86,6 +86,11 @@ void screen_wait(void);
 void screen_beep(void);
 
 /**
+ * screen_about(void) - Show about requester
+ */
+void screen_about(void);
+
+/**
  * screen_clear - Clear the screen
  */
 void screen_clear(void);

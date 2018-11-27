@@ -206,6 +206,67 @@ void screen_beep(void)
 }
 
 /**
+ * screen_about(void) - Show about requester
+ */
+void screen_about(void)
+{
+  /* The "body" text for the requester: */
+  
+  struct IntuiText my_body_text2=
+    {
+      0,       /* FrontPen, colour 0 (blue). */
+      0,       /* BackPen, not used since JAM1. */
+      JAM1,    /* DrawMode, do not change the background. */
+      15,      /* LedtEdge, 15 pixels out. */
+      39,       /* TopEdge, 5 lines down. */
+      NULL,    /* ITextFont, default font. */
+      "    and Bill Schaub", /* IText, the body text. */
+      NULL,
+    };
+
+  struct IntuiText my_body_text1=
+    {
+      0,       /* FrontPen, colour 0 (blue). */
+      0,       /* BackPen, not used since JAM1. */
+      JAM1,    /* DrawMode, do not change the background. */
+      15,      /* LedtEdge, 15 pixels out. */
+      27,       /* TopEdge, 5 lines down. */
+      NULL,    /* ITextFont, default font. */
+      "Written by: Thomas Cherryhomes", /* IText, the body text. */
+      &my_body_text2,
+    };
+
+  struct IntuiText my_body_text=
+    {
+      0,       /* FrontPen, colour 0 (blue). */
+      0,       /* BackPen, not used since JAM1. */
+      JAM1,    /* DrawMode, do not change the background. */
+      15,      /* LedtEdge, 15 pixels out. */
+      5,       /* TopEdge, 5 lines down. */
+      NULL,    /* ITextFont, default font. */
+      "PLATOTerm for Amiga", /* IText, the body text. */
+      &my_body_text1,
+    };
+
+  /* The negative text: */
+  /* (Printed inside the right gadget) */
+  struct IntuiText my_negative_text=
+    {
+      0,       /* FrontPen, colour 0 (blue). */
+      0,       /* BackPen, not used since JAM1. */
+      JAM1,    /* DrawMode, do not change the background. */
+      6,       /* LedtEdge, 6 pixels out. */
+      3,       /* TopEdge, 3 lines down. */
+      NULL,    /* ITextFont, default font. */
+      "OK",    /* IText, the text that will be printed. */
+      NULL,    /* NextText, no more IntuiText structures link. */
+    };
+
+  AutoRequest(myWindow, &my_body_text, NULL, &my_negative_text, NULL, NULL, 320, 88);  
+  
+}
+
+/**
  * screen_clear_palette - Clear the palette
  */
 void screen_clear_palette(void)

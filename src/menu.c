@@ -111,13 +111,20 @@ struct IntuiText textQuit =
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "Quit", NULL };
 
 struct MenuItem itemQuit =
-  { NULL, 0, 24, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textQuit, &textQuit, 'X',    NULL, 0 };
+  { NULL, 0, 36, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textQuit, &textQuit, 'X',    NULL, 0 };
+
+
+struct IntuiText textAbout = 
+  { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "About...", NULL };
+
+struct MenuItem itemAbout =
+  { &itemQuit, 0, 24, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP, 0, &textAbout, &textAbout, NULL,    NULL, 0 };
 
 struct IntuiText textsep1 = 
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "-----------------", NULL };
 
 struct MenuItem itemsep1 =
-  { &itemQuit, 0, 12, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED, 0, &textsep1, &textsep1, NULL,    NULL, 0 };
+  { &itemAbout, 0, 12, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED, 0, &textsep1, &textsep1, NULL,    NULL, 0 };
 
 struct IntuiText textPLATOMode =
   {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "PLATO Mode", NULL};
