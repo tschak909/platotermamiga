@@ -71,35 +71,33 @@ PLATO Keyboard
 --------------
 The PLATO keyboard is mapped to the Amiga keys, in this manner:
 
------------------------------------------
-| PLATO KEY             | Amiga Key     |
------------------------------------------
-| ANS                   | CTRL-A        |
-| BACK                  | CTRL-B        |
-| SHIFT-BACK            | CTRL-SHIFT-B  |
-| COPY                  | CTRL-C        |
-| SHIFT-COPY            | CTRL-SHIFT-C  |
-| DATA                  | CTRL-D        |
-| SHIFT-DATA            | SHIFT-CTRL-D  |
-| EDIT                  | CTRL-E        |
-| SHIFT-EDIT            | SHIFT-CTRL-E  |
-| FONT                  | CTRL-F        |
-| DIVIDE                | CTRL-G        |
-| HELP                  | CTRL-I        |
-| SHIFT-HELP            | SHIFT CTRL-H  |
-| LAB                   | CTRL-L        |
-| SHIFT-LAB             | SHIFT-CTRL-L  |
-| SUPER                 | CTRL-P        |
-| SHIFT-SUPER           | SHIFT CTRL-P  |
-| SQUARE                | CTRL-Q        |
-| ACCESS                | SHIFT CTRL-Q  |
-| STOP                  | CTRL-S        |
-| SHIFT-STOP            | SHIFT CTRL-S  |
-| TERM                  | CTRL-T        |
-| MULTIPLY              | CTRL-X        |
-| SUB                   | CTRL-Y        |
-| SHIFT-SUB             | SHIFT CTRL-Y  |
------------------------------------------
+| PLATO KEY  	| Amiga KEY |
+|---	|---	|
+| ANS  	| CTRL-A  	|
+| BACK  	| CTRL-B  	|
+| SHIFT-BACK | CTRL-SHIFT-B |
+| COPY | CTRL-C |
+| SHIFT-COPY | CTRL-SHIFT-C  |
+| DATA | CTRL-D |
+| SHIFT-DATA | SHIFT-CTRL-D |
+| EDIT | CTRL-E |
+| SHIFT-EDIT | SHIFT-CTRL-E |
+| FONT | CTRL-F |
+| &#247; | CTRL-G | 
+| HELP | CTRL-I |
+| SHIFT-HELP | SHIFT CTRL-H |
+| LAB | CTRL-L |
+| SHIFT-LAB | SHIFT-CTRL-L |
+| SUPER | CTRL-P |
+| SHIFT-SUPER | SHIFT CTRL-P |
+| SQUARE | CTRL-Q | 
+| ACCESS | SHIFT CTRL-Q |
+| STOP | CTRL-S |
+| SHIFT-STOP | SHIFT CTRL-S | 
+| TERM | CTRL-T |
+| &#215; | CTRL-X |
+| SUB | CTRL-Y |
+| SHIFT-SUB | SHIFT CTRL-Y |
 
 Problems?
 -----------
