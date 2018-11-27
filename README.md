@@ -1,36 +1,61 @@
-PLATOTerm 1.2 for ZX Spectrum Users with an RS-232 Interface
-=========================================
+PLATOTerm 0.1 Smoke Test for Amiga Users
+========================================
 
-Changes since last release:
-=================
+This version is for users with WIFI modems connected to their RS-232
+serial port. It uses the default serial.device, for now.
+And yes, the splash screen still shows an Atari logo. It will be
+replaced shortly.
 
-* Support for ZX Printer! Press EXTEND 9 to print the currently visible screen.
+Note: This is a test release, intended to test whether PLATOTerm works
+outside of emulation. The program is still being developed, and many
+user interface features are missing. If you can help with finishing
+development, please fork the repository on GitHub. Otherwise, please
+test, and let us know in the Issues if the terminal adversely does not
+at the very least:
 
-Supported Interfaces
-====================
+Please test
+-----------
 
-Currently two RS-232 interfaces are supported:
+* Set your baud rate in Serial Preferences (be sure to set RTS/CTS if
+you can use it!)
+* Start up
+* Communicate with your modem (AT OK)
+* Connect to IRATA.ONLINE
+* Reliably transfer data at the chosen baud rate and buffer settings.
+* Properly exit the program.
 
-* ZX Interface 1
-* ZX Spectrum +, 128K, and +2, +3 RS-232 port.
+A Note about PLATO.FONT and PLATOUser.font for WorkBench 2.x+ users
+-------------------------------------------------------------------
 
-You will also need a device that connects the RS-232 port to the internet. Common options here include an RS-232 wifi modem, or connecting a Raspberry Pi running TCPSER (http://github.com/tschak909/tcpser) to the port.
+Because there is a pair of fonts (in the Fonts folder on the disk) that
+must be installed to FONTS:, it is highly recommended that you use the
+included Installer script to install PLATOTerm to your destination
+medium.
 
-Loading
----------
-Since this is a tape image, it should be copied to the appropriate medium for your computer. Since there are many ways to do this, it is not mentioned in the scope of this document.
+(There is a version of this disk for 1.3 users, which includes a
+bootable Workbench, and appropriate matching icon. 1.3 users wishing to
+install to a hard disk, should manually copy the two supplied fonts to
+their FONTS: assign.)
 
-Once you've inserted your created tape, you can load the software in the usual manner:
+I am actually looking into embedding the fonts, so that I can skip the
+install altogether, and the program can either be used from its
+distribution medium, or copied by dragging to a desired destination.
 
-LOAD ""
+Loading PLATOTerm
+-----------------
+Once installed, PLATOTerm can be accessed simply by clicking on its
+icon. The icon is a drawing of a Magnavox PLATO IV terminal, from 1974,
+and is widely regarded as the iconic PLATO terminal. If you have a
+better icon, please contribute!
 
 Using PLATOTerm
---------------------
-PLATOTerm will then display a splash screen, indicating that it is ready for use.
+---------------
+PLATOTerm will then display a splash screen, indicating that it is
+ready for use.
 
-![image](https://i.imgur.com/xZGyEYB.png)
-
-Once you see this splash screen, the terminal is ready for use, and you can send commands to your WIFI modem, to connect to a PLATO service, such as IRATA.ONLINE:
+Once you see this splash screen, the terminal is ready for use, and you
+can send commands to your WIFI modem, to connect to a PLATO service,
+such as IRATA.ONLINE:
 
 ATDTIRATA.ONLINE:8005
 
@@ -38,44 +63,47 @@ or, CYBER1.ORG
 
 ATDTCYBERSERV.ORG:8005
 
-For this initial testing release, the baud rate is set to 4800BPS, if this baud rate proves too problematic, please file an issue, and I will add in preferences to set the baud rate and cut a new release.
+For this initial testing release, the baud rate is set to 960BPS, if
+this baud rate proves too problematic, please set a new baud rate in
+Preferences.
 
 PLATO Keyboard
--------------------
-The PLATO keyboard is mapped to the Spectrum keys, like so:
+--------------
+The PLATO keyboard is mapped to the Amiga keys, in this manner:
 
-| PLATO KEY  	   | ZX Key  	|
-|---	|---	   |
-| ANS  	| EXTEND-A	|
-| BACK    | EXTEND-B  	|
-| SHIFT-BACK | EXTEND-SHIFT-B |
-| COPY | EXTEND-C |
-| SHIFT-COPY | EXTEND-SHIFT-C  |
-| DATA | EXTEND-D |
-| SHIFT-DATA | SHIFT-EXTEND-D |
-| EDIT | EXTEND-E |
-| SHIFT-EDIT | SHIFT-EXTEND-E |
-| FONT | EXTEND-F |
-| &#247; | EXTEND-G |
-| HELP | EXTEND-I |
-| SHIFT-HELP | SHIFT EXTEND-H |
-| LAB | EXTEND-L |
-| SHIFT-LAB | SHIFT-EXTEND-L |
-| SUPER | EXTEND-P |
-| SHIFT-SUPER | SHIFT EXTEND-P |
-| SQUARE | EXTEND-Q |
-| ACCESS | SHIFT EXTEND-Q |
-| STOP | EXTEND-S |
-| SHIFT-STOP | SHIFT EXTEND-S |
-| TERM | EXTEND-T |
-| &#215; | EXTEND-X |
-| SUB | EXTEND-Y |
-| SHIFT-SUB | SHIFT EXTEND-Y |
-| Print screen | EXTEND 9 |
-| Get Key Help | EXTEND 0 |
-
-As mentioned in the table above, Pressing EXTEND 0 gives you a menu of keys, asking you to input which one for which you want the equivalent ZX spectrum keypress.
+-----------------------------------------
+| PLATO KEY             | Amiga Key     |
+-----------------------------------------
+| ANS                   | CTRL-A        |
+| BACK                  | CTRL-B        |
+| SHIFT-BACK            | CTRL-SHIFT-B  |
+| COPY                  | CTRL-C        |
+| SHIFT-COPY            | CTRL-SHIFT-C  |
+| DATA                  | CTRL-D        |
+| SHIFT-DATA            | SHIFT-CTRL-D  |
+| EDIT                  | CTRL-E        |
+| SHIFT-EDIT            | SHIFT-CTRL-E  |
+| FONT                  | CTRL-F        |
+| DIVIDE                | CTRL-G        |
+| HELP                  | CTRL-I        |
+| SHIFT-HELP            | SHIFT CTRL-H  |
+| LAB                   | CTRL-L        |
+| SHIFT-LAB             | SHIFT-CTRL-L  |
+| SUPER                 | CTRL-P        |
+| SHIFT-SUPER           | SHIFT CTRL-P  |
+| SQUARE                | CTRL-Q        |
+| ACCESS                | SHIFT CTRL-Q  |
+| STOP                  | CTRL-S        |
+| SHIFT-STOP            | SHIFT CTRL-S  |
+| TERM                  | CTRL-T        |
+| MULTIPLY              | CTRL-X        |
+| SUB                   | CTRL-Y        |
+| SHIFT-SUB             | SHIFT CTRL-Y  |
+-----------------------------------------
 
 Problems?
 -----------
-This is early release software. If you have problems, please raise an issue, and I will address them and cut a new release. I am releasing this early and often so that everyone can test, and we can in the end, end up with a better piece of software, faster.
+This is early test software. If you have problems, please raise an
+issue, and I will address them and cut a new release. I am releasing
+this early and often so that everyone can test, and we can in the end,
+end up with a better piece of software, faster.
