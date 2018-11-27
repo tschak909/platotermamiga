@@ -10,6 +10,8 @@
 #define WIDTH_EDIT_MENU_TITLE     80
 #define WIDTH_TERMINAL_MENU_ITEM  144
 #define WIDTH_TERMINAL_MENU_TITLE 80
+#define WIDTH_HELP_MENU_ITEM      180
+#define WIDTH_HELP_MENU_TITLE     80
 #define HEIGHT_ITEM               12
 
 #define LEFT_TEXT_ITEM             4
@@ -133,11 +135,24 @@ struct MenuItem itemPLATOMode =
   { &itemsep1, 0, 0, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT, 0, &textPLATOMode, &textPLATOMode, 'T',    NULL, 0 };
 
 /**
+ * Help menu
+ */
+struct IntuiText textHelpKeys =
+  {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "PLATO Keys...", NULL};
+
+struct MenuItem itemHelpKeys =
+  { NULL, 0, 0, WIDTH_HELP_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|CHECKIT, 0, &textHelpKeys, &textHelpKeys, 'K',    NULL, 0 };
+
+/**
  * The menu strip 
  */
 
+struct Menu menuHelp =
+  { NULL, 200, 0, 46, HEIGHT_ITEM, MENUENABLED, "Help", &itemHelpKeys, 0, 0, 0, 0    };
+  
+
 struct Menu menuBaud =
-  { NULL, 130, 0, 60, HEIGHT_ITEM, MENUENABLED, "Baud", &item300, 0, 0, 0, 0    };
+  { &menuHelp, 130, 0, 60, HEIGHT_ITEM, MENUENABLED, "Baud", &item300, 0, 0, 0, 0    };
 
 struct Menu menuEdit =
   { &menuBaud, 80, 0, 48, HEIGHT_ITEM, MENUENABLED, "Edit", &itemCopyText, 0, 0, 0, 0    };

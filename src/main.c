@@ -9,10 +9,13 @@
 #include "keyboard.h"
 #include "touch.h"
 #include "menu.h"
+#include "help.h"
+
 #define true 1
 #define false 0
 
 unsigned char already_started=false;
+unsigned long sigbits;
 
 extern MySer* ms;
 extern struct Window* myWindow;
@@ -27,12 +30,14 @@ int main(void)
   terminal_init();
   ShowPLATO(splash,sizeof(splash));
   terminal_initial_position();
+  sigbits=(1L << ms->readport->mp_SigBit) | ( 1L << myWindow->UserPort->mp_SigBit);
   for (;;)
     {
-      Wait((1L << ms->readport->mp_SigBit) | ( 1L << myWindow->UserPort->mp_SigBit));
+      Wait(sigbits);
       io_main();
       keyboard_main();
       touch_main();
+      help_keys_main();
     }
 }
 

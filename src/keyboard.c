@@ -17,6 +17,7 @@
 #include "io.h"
 #include "key.h"
 #include "menu.h"
+#include "help.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
@@ -116,6 +117,10 @@ void keyboard_main(void)
 		  InitPLATO();
 		else
 		  InitTTY();
+	      }
+	    else if (menuNum==3&&itemNum==0&&subNum==31)
+	      {
+		help_keys_show();
 	      }
             menuNumber = item->NextSelect;
           }
