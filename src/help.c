@@ -147,6 +147,7 @@ void help_keys_main(void)
       if (intuition_msg->Class==IDCMP_CLOSEWINDOW)
 	{
 	  CloseWindow(windowHelpKeys);
+	  help_keys_is_open=0;
 	}
     }
     
