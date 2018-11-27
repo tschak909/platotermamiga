@@ -96,6 +96,9 @@ UBYTE *tmpbuf;
 ULONG rassize;
 struct AreaInfo areainfo;
 UBYTE *areabuf;
+BYTE lowmem_flag = 0; /* true if we are low on chipram when we started */
+                      /* in future we can use other values than 1 
+                       * for more aggressive memory saving options     */
 #define MAXVEC 80
 #define AREABUF_SIZE 8*MAXVEC
 /**
@@ -104,6 +107,13 @@ UBYTE *areabuf;
 void screen_init(void)
 {
   unsigned char *bp;
+  ULONG chipram;
+  /* before we start messing with the screen, lets check out much
+   * chipram we have available. so we can do things like close the workbench */
+  chipram = AvailMem(MEMF_CHIP|MEMF_LARGEST);
+  if(chipram <= 319136){
+      lowmem_flag = 1;
+  }
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
 
   if (!IntuitionBase)
@@ -113,6 +123,9 @@ void screen_init(void)
 
   if (!GfxBase)
     done();
+
+  if(lowmem_flag) /* low memory detcted close the workbench to help free memory */
+      CloseWorkBench();
 
   myScreen = OpenScreen(&Screen1);
   if (!myScreen)
@@ -480,6 +493,9 @@ void screen_done(void)
     CloseWindow(myWindow);
   if (myScreen)
     CloseScreen(myScreen);
+  
+  if(lowmem_flag) /* we closed the workbench above, try to open it again */
+      OpenWorkBench();
 
   if (IntuitionBase)
     CloseLibrary((struct Library*)IntuitionBase);
