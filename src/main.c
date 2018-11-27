@@ -46,6 +46,7 @@ int main(void)
  */
 void done(void)
 {
+  help_done();
   touch_done();
   io_done();
   sound_done();
