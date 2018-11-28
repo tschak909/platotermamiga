@@ -51,31 +51,52 @@ struct Border my_border=
 };
 
 
-
-/* The text string: */
-UBYTE my_string[]="PRESS ME";
-
-/* The IntuiText structure: */
-struct IntuiText my_text=
-{
-  1,         /* FrontPen, colour register 1. */
-  0,         /* BackPen, colour register 0. */
-  JAM1,      /* DrawMode, draw the characters with colour 1, do not */
-             /* change the background. */ 
-  4, 2,      /* LeftEdge, TopEdge. */
-  NULL,      /* ITextFont, use default font. */
-  my_string, /* IText, the text that will be printed. */
-             /* (Remember my_text = &my_text[0].) */
-  NULL,      /* NextText, no other IntuiText structures are connected. */
-};
-
+/**
+ * IntuiText contents
+ */
+static struct IntuiText textKeys17 =
+  {1,0,JAM1,0,204,NULL,"ERASE    BACKSP",NULL};
+static struct IntuiText textKeys16 =
+  {1,0,JAM1,0,192,NULL,"SUB      CTRL-Y",&textKeys17};
+static struct IntuiText textKeys15 =
+  {1,0,JAM1,0,180,NULL,"MULTIPLY CTRL-X",&textKeys16};
+static struct IntuiText textKeys14 =
+  {1,0,JAM1,0,168,NULL,"TERM     CTRL-T",&textKeys15};
+static struct IntuiText textKeys13 =
+  {1,0,JAM1,0,156,NULL,"STOP     CTRL-S",&textKeys14};
+static struct IntuiText textKeys12 =
+  {1,0,JAM1,0,144,NULL,"SQUARE   CTRl-Q",&textKeys13};
+static struct IntuiText textKeys11 =
+  {1,0,JAM1,0,132,NULL,"SUPER    CTRL-P",&textKeys12};
+static struct IntuiText textKeys10 =
+  {1,0,JAM1,0,120,NULL,"NEXT     ENTER",&textKeys11};
+static struct IntuiText textKeys9 =
+  {1,0,JAM1,0,108,NULL,"MICRO    CTRL-N",&textKeys10};
+static struct IntuiText textKeys8 =
+  {1,0,JAM1,0,96,NULL,"LAB      CTRL-L",&textKeys9};
+static struct IntuiText textKeys7 =
+  {1,0,JAM1,0,84,NULL,"HELP     HELP",&textKeys8};
+static struct IntuiText textKeys6 =
+  {1,0,JAM1,0,72,NULL,"DIVIDE   CTRL-G",&textKeys7};
+static struct IntuiText textKeys5 =
+  {1,0,JAM1,0,60,NULL,"FONT     CTRL-F",&textKeys6};
+static struct IntuiText textKeys4 =
+  {1,0,JAM1,0,48,NULL,"EDIT     CTRL-E",&textKeys5};
+static struct IntuiText textKeys3 =
+  {1,0,JAM1,0,36,NULL,"DATA     CTRL-D",&textKeys4};
+static struct IntuiText textKeys2 =
+  {1,0,JAM1,0,24,NULL,"COPY     CTRL-C",&textKeys3};
+static struct IntuiText textKeys1 =
+  {1,0,JAM1,0,12,NULL,"BACK     CTRL-B",&textKeys2};
+static struct IntuiText textKeys0 =
+  {1,0,JAM1,0,0,NULL,"ANS      CTRL-A",&textKeys1};
 
 
 struct Gadget my_gadget=
 {
   NULL,          /* NextGadget, no more gadgets in the list. */
-  40,            /* LeftEdge, 40 pixels out. */
-  20,            /* TopEdge, 20 lines down. */
+  8,            /* LeftEdge, 40 pixels out. */
+  16,            /* TopEdge, 20 lines down. */
   71,            /* Width, 71 pixels wide. */
   11,            /* Height, 11 pixels lines heigh. */
   GADGHCOMP,     /* Flags, when this gadget is highlighted, the gadget */
@@ -84,11 +105,9 @@ struct Gadget my_gadget=
                  /* (Colour 1 (01)           - " -           2 (10) */
                  /* (Colour 2 (10)           - " -           1 (01) */
                  /* (Colour 3 (11)           - " -           0 (00) */  
-  GADGIMMEDIATE| /* Activation, our program will recieve a message when */
-  RELVERIFY,     /* the user has selected this gadget, and when the user */
-                 /* has released it. */ 
+  0,
   BOOLGADGET,    /* GadgetType, a Boolean gadget. */
-  (APTR) &my_border, /* GadgetRender, a pointer to our Border structure. */
+  NULL, /* GadgetRender, a pointer to our Border structure. */
                  /* (Since Intuition does not know if this will be a */
                  /* pointer to a Border structure or an Image structure, */
                  /* Intuition expects an APTR (normal memory pointer). */
@@ -97,7 +116,7 @@ struct Gadget my_gadget=
   NULL,          /* SelectRender, NULL since we do not supply the gadget */
                  /* with an alternative image. (We complement the */
                  /* colours instead) */
-  &my_text,      /* GadgetText, a pointer to our IntuiText structure. */
+  &textKeys0,      /* GadgetText, a pointer to our IntuiText structure. */
                  /* (See chapter 3 GRAPHICS for more information) */
   NULL,          /* MutualExclude, no mutual exclude. */
   NULL,          /* SpecialInfo, NULL since this is a Boolean gadget. */
@@ -108,10 +127,10 @@ struct Gadget my_gadget=
 
 struct NewWindow windowHelpKeysLayout = {
   479, 16,
-  160, 383,
+  136, 236,
   0,1,
   IDCMP_CLOSEWINDOW,
-  WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR|WFLG_SIZEGADGET|WFLG_SIZEBRIGHT|WFLG_SIZEBBOTTOM,
+  WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR,
   &my_gadget, NULL,
   "PLATO Keys",
   NULL,NULL,
@@ -130,7 +149,6 @@ void help_keys_show(void)
 {
   windowHelpKeysLayout.Screen = myScreen;
   windowHelpKeys=OpenWindow(&windowHelpKeysLayout);
-  windowHelpKeysLayout.FirstGadget = &my_gadget;
   help_keys_is_open=1;
 }
 
