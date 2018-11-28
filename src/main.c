@@ -37,7 +37,6 @@ int main(void)
       io_main();
       keyboard_main();
       touch_main();
-      help_keys_main();
     }
 }
 

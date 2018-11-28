@@ -24,7 +24,7 @@ extern struct Window *myWindow;
 extern struct Screen *myScreen;
 
 unsigned char help_keys_is_open=0; // Is help window open?
-extern struct IntuiMessage* intuition_msg;
+struct IntuiMessage* help_intuition_msg;
 
 static struct Window *windowHelpKeys;
 
@@ -160,12 +160,14 @@ void help_keys_main(void)
   if (help_keys_is_open==0)
     return;
 
-  while (intuition_msg = (struct IntuiMessage *) GetMsg(windowHelpKeys->UserPort))
+  while (help_intuition_msg = (struct IntuiMessage *) GetMsg(windowHelpKeys->UserPort))
     {
-      if (intuition_msg->Class==IDCMP_CLOSEWINDOW)
+      if (help_intuition_msg->Class==IDCMP_CLOSEWINDOW)
 	{
+	  ReplyMsg((struct Message *)help_intuition_msg);
 	  CloseWindow(windowHelpKeys);
 	  help_keys_is_open=0;
+	  
 	}
     }
     

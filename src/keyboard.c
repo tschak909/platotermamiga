@@ -56,6 +56,8 @@ void keyboard_main(void)
   UWORD subNum;
   struct MenuItem *item;
 
+  help_keys_main();
+
   while (intuition_msg = (struct IntuiMessage *) GetMsg(myWindow->UserPort))
     {
       if (intuition_msg->Class == VANILLAKEY)
@@ -124,7 +126,6 @@ void keyboard_main(void)
 	      }
             menuNumber = item->NextSelect;
           }
-          ReplyMsg((struct Message *)intuition_msg);
       }
     }
 }
