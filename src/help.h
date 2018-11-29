@@ -17,11 +17,6 @@ void help_keys_show(void);
 
 
 /**
- * Key help main
- */
-void help_keys_main(void);
-
-/**
  * Help done.
  */
 void help_done(void);

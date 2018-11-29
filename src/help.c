@@ -26,7 +26,7 @@ extern struct Screen *myScreen;
 unsigned char help_keys_is_open=0; // Is help window open?
 struct IntuiMessage* help_intuition_msg;
 
-static struct Window *windowHelpKeys;
+struct Window *windowHelpKeys;
 
 /* The coordinates for the box: */
 SHORT my_points[]=
@@ -129,7 +129,7 @@ struct NewWindow windowHelpKeysLayout = {
   479, 16,
   136, 236,
   0,1,
-  IDCMP_CLOSEWINDOW,
+  0L, /* we don't want any IDCMP, we will set this up later */
   WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR,
   &my_gadget, NULL,
   "PLATO Keys",
@@ -140,37 +140,51 @@ struct NewWindow windowHelpKeysLayout = {
 };
 
 
+/* remove and reply all IntuiMessages on a port that
+ * have been sent to a particular window
+ * (note that we don't rely on the ln_Succ pointer
+ *  of a message after we have replied it)
+ */
+void StripIntuiMessages( mp, win )
+struct MsgPort *mp;
+struct Window *win;
+{
+    struct IntuiMessage *msg;
+    struct Node *succ;
 
+    msg = (struct IntuiMessage *) mp->mp_MsgList.lh_Head;
+
+    while( succ =  msg->ExecMessage.mn_Node.ln_Succ ) {
+
+    if( msg->IDCMPWindow ==  win ) {
+
+        /* Intuition is about to free this message.
+         * Make sure that we have politely sent it back.
+         */
+        Remove((struct Node *)  msg );
+
+        ReplyMsg((struct Message *) msg );
+    }
+
+    msg = (struct IntuiMessage *) succ;
+    }
+}
 /**
  * Show key help
  * Assumed that screen is already initialized.
  */
 void help_keys_show(void)
 {
+  extern struct Window *myWindow;
+  if(help_keys_is_open)
+      return;
   windowHelpKeysLayout.Screen = myScreen;
   windowHelpKeys=OpenWindow(&windowHelpKeysLayout);
+  windowHelpKeys->UserPort = myWindow->UserPort; /* Share our main UserPort */
+  ModifyIDCMP(windowHelpKeys,IDCMP_CLOSEWINDOW); /* Listen for CLOSEWINDOW */ 
+  /* At this point we should still be getting IDCMP events for both windows on 
+   * our main UserPor */
   help_keys_is_open=1;
-}
-
-/**
- * Key help main
- */
-void help_keys_main(void)
-{
-  if (help_keys_is_open==0)
-    return;
-
-  while (help_intuition_msg = (struct IntuiMessage *) GetMsg(windowHelpKeys->UserPort))
-    {
-      if (help_intuition_msg->Class==IDCMP_CLOSEWINDOW)
-	{
-	  ReplyMsg((struct Message *)help_intuition_msg);
-	  CloseWindow(windowHelpKeys);
-	  help_keys_is_open=0;
-	  
-	}
-    }
-    
 }
 
 /**
@@ -179,5 +193,21 @@ void help_keys_main(void)
 void help_done(void)
 {
   if (help_keys_is_open==1)
+  {
+    /* We can't just call CloseWindow. it's not that simple. */
+    /* The following is from the CloseWindow Autodocs */
+    Forbid(); /* prevent race conditions with Intuition */
+    /* Send back any messages for this window
+     * that have not yet been processed 
+     */
+    StripIntuiMessages(windowHelpKeys->UserPort, windowHelpKeys);
+    /* tell intuition that we don't want any more messages */
+    windowHelpKeys->UserPort = 0L;
+    ModifyIDCMP(windowHelpKeys,0L);
+    /* turn multitasking back on */
+    Permit();
+    /* Finally close the window */
     CloseWindow(windowHelpKeys);
+    help_keys_is_open = 0;
+  }
 }
