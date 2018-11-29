@@ -36,7 +36,6 @@ int main(void)
       Wait(sigbits);
       io_main();
       keyboard_main();
-      touch_main();
     }
 }
 
@@ -46,7 +45,6 @@ int main(void)
 void done(void)
 {
   help_done();
-  touch_done();
   io_done();
   sound_done();
   screen_done();

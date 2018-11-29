@@ -18,11 +18,15 @@
 #include "key.h"
 #include "menu.h"
 #include "help.h"
+#include "touch.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
 unsigned char shift_state=0;
 extern void done(void);
+extern unsigned short scaletx[];
+extern unsigned short scalety[];
+
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
  * directly. Otherwise, platoKey is an access key, and the
@@ -68,7 +72,18 @@ void keyboard_main(void)
               help_done();
           continue; /* Once we've replied we can't do anything else with the struct */
       }
-      if (intuition_msg->Class == VANILLAKEY)
+      else if (intuition_msg->Class == MOUSEBUTTONS)
+	{
+	  if ((intuition_msg->MouseX + 64) < 640 &&
+	      (intuition_msg->MouseX + 64) > 64  &&
+	      (intuition_msg->MouseY) < 400      &&
+	      (intuition_msg->MouseY) > 0)
+	    {
+	      padPt Coord={scaletx[intuition_msg->MouseX-64],scalety[intuition_msg->MouseY]};
+	      Touch(&Coord);
+	    }
+	}
+      else if (intuition_msg->Class == VANILLAKEY)
 	{
 	  if (intuition_msg->Qualifier & IEQUALIFIER_RCOMMAND)
 	    {
