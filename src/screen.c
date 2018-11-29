@@ -223,7 +223,7 @@ void screen_about(void)
       15,      /* LedtEdge, 15 pixels out. */
       39,       /* TopEdge, 5 lines down. */
       NULL,    /* ITextFont, default font. */
-      "    and Willaim Schaub", /* IText, the body text. */
+      "    and William Schaub", /* IText, the body text. */
       NULL,
     };
 
