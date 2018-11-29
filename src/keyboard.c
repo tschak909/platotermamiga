@@ -76,6 +76,10 @@ void keyboard_main(void)
 		{
 		  done();
 		}
+	      else if (intuition_msg->Code=='k')
+		{
+		  help_keys_show();
+		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
