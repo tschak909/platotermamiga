@@ -141,7 +141,7 @@ struct IntuiText textHelpKeys =
   {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "PLATO Keys...", NULL};
 
 struct MenuItem itemHelpKeys =
-  { NULL, 0, 0, WIDTH_HELP_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|CHECKIT, 0, &textHelpKeys, &textHelpKeys, 'K',    NULL, 0 };
+  { NULL, 0, 0, WIDTH_HELP_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textHelpKeys, &textHelpKeys, 'K',    NULL, 0 };
 
 /**
  * The menu strip 
