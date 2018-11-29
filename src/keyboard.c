@@ -56,10 +56,18 @@ void keyboard_main(void)
   UWORD subNum;
   struct MenuItem *item;
 
-  help_keys_main();
 
   while (intuition_msg = (struct IntuiMessage *) GetMsg(myWindow->UserPort))
     {
+      if (intuition_msg->Class == IDCMP_CLOSEWINDOW) {
+          struct Window *tmp;
+          extern struct Window *windowHelpKeys;
+          tmp = intuition_msg->IDCMPWindow;
+          ReplyMsg((struct Message *) intuition_msg);
+          if(tmp == windowHelpKeys) /* Oh, hey it's our help window, close it */
+              help_done();
+          continue; /* Once we've replied we can't do anything else with the struct */
+      }
       if (intuition_msg->Class == VANILLAKEY)
 	{
 	  if (intuition_msg->Qualifier & IEQUALIFIER_RCOMMAND)

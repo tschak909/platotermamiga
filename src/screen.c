@@ -27,7 +27,10 @@
 #include "protocol.h"
 #include "scale.h"
 #include "font.h"
-
+#ifdef __VBCC__
+#undef NULL
+#define NULL 0L
+#endif
 unsigned char CharWide=8;
 unsigned char CharHigh=16;
 unsigned char screen_mode;
@@ -220,7 +223,7 @@ void screen_about(void)
       15,      /* LedtEdge, 15 pixels out. */
       39,       /* TopEdge, 5 lines down. */
       NULL,    /* ITextFont, default font. */
-      "    and Bill Schaub", /* IText, the body text. */
+      "    and William Schaub", /* IText, the body text. */
       NULL,
     };
 
