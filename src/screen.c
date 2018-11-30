@@ -52,6 +52,9 @@ padRGB palette[16];
 #define MAX(a,b)    ((a)>(b)?(a):(b))
 #define MIN(a,b)    ((a)<(b)?(a):(b))
 
+static char windowTitle[128]; /* Window title
+                               * (used for overall status display) */
+
 extern void done(void);
 
 struct IntuitionBase *IntuitionBase;
@@ -188,9 +191,8 @@ void screen_update_colors(void)
  */
 void screen_update_title(void)
 {
-  char title[128];
-  sprintf(title,"PLATOTerm | %6ld | N81 | %s | %s | Recv Buf Len: %6ld",io_status_baud(),io_status_serflags(),terminal_status(),io_status_rbuflen());
-  SetWindowTitles(myWindow,title,title);
+  sprintf(windowTitle,"PLATOTerm | %6ld | N81 | %s | %s | Recv Buf Len: %6ld",io_status_baud(),io_status_serflags(),terminal_status(),io_status_rbuflen());
+  SetWindowTitles(myWindow,windowTitle,windowTitle);
 }
 
 /**
