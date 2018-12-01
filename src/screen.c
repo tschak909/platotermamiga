@@ -74,7 +74,7 @@ struct NewWindow winlayout = {
   0, 0,
   639, 399,
   0,1,
-  IDCMP_CLOSEWINDOW|IDCMP_MENUPICK|IDCMP_ACTIVEWINDOW|IDCMP_VANILLAKEY|IDCMP_MOUSEBUTTONS|IDCMP_MENUPICK|IDCMP_INTUITICKS,
+  IDCMP_CLOSEWINDOW|IDCMP_MENUPICK|IDCMP_ACTIVEWINDOW|IDCMP_VANILLAKEY|IDCMP_MOUSEBUTTONS|IDCMP_INTUITICKS,
   WFLG_ACTIVATE|WFLG_BACKDROP|WFLG_BORDERLESS,
   NULL, NULL,
   "PLATOTerm",
@@ -95,15 +95,15 @@ struct TextFont* platoUserFont;
  * primitives to work well.
  */
 struct TmpRas tmpras;
-UBYTE *tmpbuf;
-ULONG rassize;
+PLANEPTR tmpbuf;
+LONG rassize;
 struct AreaInfo areainfo;
-UBYTE *areabuf;
+UWORD *areabuf;
 BYTE lowmem_flag = 0; /* true if we are low on chipram when we started */
                       /* in future we can use other values than 1 
                        * for more aggressive memory saving options     */
-#define MAXVEC 80
-#define AREABUF_SIZE 8*MAXVEC
+#define MAXVEC 80     /* Maximum number of lines */
+#define AREABUF_SIZE 5*MAXVEC /* 5 bytes per vertex */
 /**
  * screen_init() - Set up the screen
  */
