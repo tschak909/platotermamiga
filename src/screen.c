@@ -26,7 +26,6 @@
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
-#include "font.h"
 #ifdef __VBCC__
 #undef NULL
 #define NULL 0L
