@@ -87,8 +87,10 @@ struct NewWindow winlayout = {
 };
 
 struct TextAttr plato_ta = {"PLATO.font",12,0,0};
+struct TextAttr plato_bold_ta = {"PLATO.font",24,0,0};
 struct TextAttr platouser_ta = {"PLATOUser.font",12,0,0};
 struct TextFont* platoFont;
+struct TextFont* platoBoldFont;
 struct TextFont* platoUserFont;
 
 /* All of this is needed if we don't want area fills that are slower than
@@ -161,6 +163,11 @@ void screen_init(void)
   if (!platoFont)
     done();
 
+  platoBoldFont=OpenDiskFont(&plato_bold_ta);
+
+  if (!platoBoldFont)
+    done();
+  
   platoUserFont=OpenDiskFont(&platouser_ta);
 
   if (!platoUserFont)
@@ -374,11 +381,17 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
   switch(CurMem)
     {
     case M0:
-      SetFont(myWindow->RPort,platoFont);
+      if (ModeBold)
+	SetFont(myWindow->RPort,platoBoldFont);
+      else
+	SetFont(myWindow->RPort,platoFont);
       offset=0;
       break;
     case M1:
-      SetFont(myWindow->RPort,platoFont);
+      if (ModeBold)
+	SetFont(myWindow->RPort,platoBoldFont);
+      else
+	SetFont(myWindow->RPort,platoFont);
       offset=96;
       break;
     case M2:
@@ -544,6 +557,9 @@ void screen_done(void)
 {
   if (platoFont)
     CloseFont(platoFont);
+
+  if (platoBoldFont)
+    CloseFont(platoBoldFont);
 
   if (platoUserFont)
     CloseFont(platoUserFont);
