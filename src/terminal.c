@@ -260,18 +260,18 @@ void terminal_char_load(padWord charNum, charData theChar)
 	}
     }
   
-  /* fontm23[(charNum*12)+0]=char_data[0]; */
-  /* fontm23[(charNum*12)+128]=char_data[1]; */
-  /* fontm23[(charNum*12)+256]=char_data[2]|char_data[3]; */
-  /* fontm23[(charNum*12)+384]=char_data[4]; */
-  /* fontm23[(charNum*12)+512]=char_data[5]; */
-  /* fontm23[(charNum*12)+640]=char_data[6]|char_data[7]; */
-  /* fontm23[(charNum*12)+768]=char_data[8]; */
-  /* fontm23[(charNum*12)+896]=char_data[9]; */
-  /* fontm23[(charNum*12)+1024]=char_data[10]|char_data[11]; */
-  /* fontm23[(charNum*12)+1152]=char_data[12]; */
-  /* fontm23[(charNum*12)+1280]=char_data[13]; */
-  /* fontm23[(charNum*12)+1408]=char_data[14]|char_data[15]; */
+  fontm23[(charNum)+0]=char_data[0];
+  fontm23[(charNum)+128]=char_data[1];
+  fontm23[(charNum)+256]=char_data[2]|char_data[3];
+  fontm23[(charNum)+384]=char_data[4];
+  fontm23[(charNum)+512]=char_data[5];
+  fontm23[(charNum)+640]=char_data[6]|char_data[7];
+  fontm23[(charNum)+768]=char_data[8];
+  fontm23[(charNum)+896]=char_data[9];
+  fontm23[(charNum)+1024]=char_data[10]|char_data[11];
+  fontm23[(charNum)+1152]=char_data[12];
+  fontm23[(charNum)+1280]=char_data[13];
+  fontm23[(charNum)+1408]=char_data[14]|char_data[15];
 }
 
 /**

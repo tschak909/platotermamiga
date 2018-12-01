@@ -14,6 +14,7 @@
 #include <proto/graphics.h>
 #include <proto/layers.h>
 #include <proto/exec.h>
+#include <proto/utility.h>
 #include <exec/memory.h>
 #include <graphics/gfxmacros.h>
 #include <graphics/text.h>
@@ -26,6 +27,7 @@
 #include "screen.h"
 #include "protocol.h"
 #include "scale.h"
+#include "font.h"
 #ifdef __VBCC__
 #undef NULL
 #define NULL 0L
@@ -43,7 +45,7 @@ unsigned long current_foreground=1;
 unsigned long current_background=0;
 padRGB current_foreground_rgb={255,255,255};
 padRGB current_background_rgb={0,0,0};
-ULONG* fontm23;
+unsigned char* fontm23;
 unsigned char is_mono=0;
 unsigned char highest_color_index=0;
 padRGB palette[16];
@@ -77,7 +79,7 @@ struct NewWindow winlayout = {
   639, 399,
   0,1,
   IDCMP_CLOSEWINDOW|IDCMP_MENUPICK|IDCMP_ACTIVEWINDOW|IDCMP_VANILLAKEY|IDCMP_MOUSEBUTTONS|IDCMP_INTUITICKS,
-  WFLG_ACTIVATE|WFLG_BACKDROP|WFLG_BORDERLESS,
+  WFLG_ACTIVATE|WFLG_BACKDROP|WFLG_BORDERLESS|WFLG_GIMMEZEROZERO,
   NULL, NULL,
   "PLATOTerm",
   NULL,NULL,
@@ -88,10 +90,8 @@ struct NewWindow winlayout = {
 
 struct TextAttr plato_ta = {"PLATO.font",12,0,0};
 struct TextAttr plato_bold_ta = {"PLATO.font",24,0,0};
-struct TextAttr platouser_ta = {"PLATOUser.font",12,0,0};
 struct TextFont* platoFont;
 struct TextFont* platoBoldFont;
-struct TextFont* platoUserFont;
 
 /* All of this is needed if we don't want area fills that are slower than
  * grandma on Nyquil. 
@@ -167,14 +167,13 @@ void screen_init(void)
 
   if (!platoBoldFont)
     done();
+
+  font_init_platoUserFont();
+  AddFont(&platoUserFont);
   
-  platoUserFont=OpenDiskFont(&platouser_ta);
-
-  if (!platoUserFont)
-    done();
-
   // This is probably very wrong, but...hey...
-  fontm23=platoUserFont->tf_CharData;
+  fontm23=(unsigned char*)platoUserFont.tf_CharData;
+  fontm23[2]=0xFF;
 }
 
 /**
@@ -395,11 +394,11 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
       offset=96;
       break;
     case M2:
-      SetFont(myWindow->RPort,platoUserFont);
+      SetFont(myWindow->RPort,&platoUserFont);
       offset=-32;
       break;
     case M3:
-      SetFont(myWindow->RPort,platoUserFont);
+      SetFont(myWindow->RPort,&platoUserFont);
       offset=32;
       break;
     }
@@ -427,7 +426,7 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
     }
 
   x=scalex[Coord->x];
-  y=scaley[Coord->y]-4;
+  y=scaley[Coord->y]-3;
 
   for (i=0;i<count;++i)
     ch[i]+=offset;
@@ -561,8 +560,7 @@ void screen_done(void)
   if (platoBoldFont)
     CloseFont(platoBoldFont);
 
-  if (platoUserFont)
-    CloseFont(platoUserFont);
+  RemFont(&platoUserFont);
   
   if (myWindow)
     /* deallocate tmpras and areainfo */
