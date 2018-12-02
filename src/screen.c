@@ -264,8 +264,10 @@ void screen_about(void)
       NULL,    /* NextText, no more IntuiText structures link. */
     };
 
+  char reqTitle[]="About PLATOTerm";
+  SetWindowTitles(myWindow,reqTitle,reqTitle);
   AutoRequest(myWindow, &my_body_text, NULL, &my_negative_text, NULL, NULL, 320, 88);  
-  
+  screen_update_title();
 }
 
 /**

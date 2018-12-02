@@ -189,7 +189,7 @@ InitPLATOx (void)
   CurMem = M0;
   CurMode = ModeRewrite;
   screen_update_title();
-  menu_toggle_plato_mode(0);
+  menu_toggle_plato_mode(1);
 }
 
 
