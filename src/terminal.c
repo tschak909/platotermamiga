@@ -46,33 +46,18 @@ extern unsigned char already_started;
 static unsigned char char_data[]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 				  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
+static unsigned short bold_char_data[]={0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+					0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
+
 static unsigned char BTAB[]={0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
-static unsigned char BTAB_5[]={0x08,0x10,0x10,0x20,0x20,0x40,0x80,0x80};
-static unsigned char TAB_0_5[]={0x05,0x05,0x05,0x04,0x04,0x04,0x03,0x03,0x02,0x02,0x01,0x01,0x01,0x00,0x00,0x00};
-static unsigned char TAB_0_5i[]={0x00,0x00,0x00,0x01,0x01,0x01,0x02,0x02,0x03,0x03,0x04,0x04,0x04,0x05,0x05,0x05};
+const unsigned short DBLORTAB[8]={0x0003,0x000C,0x0030,0x00C0,0x0300,0x0C00,0x3000,0xC000};
 
-static unsigned char TAB_0_4[]={0x00,0x00,0x01,0x02,0x02,0x03,0x03,0x04};
-
-static unsigned char PIX_THRESH[]={0x03,0x02,0x03,0x03,0x02,
-				   0x03,0x02,0x03,0x03,0x02,
-				   0x02,0x01,0x02,0x02,0x01,
-				   0x02,0x01,0x02,0x02,0x01,
-				   0x03,0x02,0x03,0x03,0x02,
-				   0x03,0x02,0x03,0x03,0x02};
-
-static unsigned char PIX_WEIGHTS[]={0x00,0x00,0x00,0x00,0x00,
-				    0x00,0x00,0x00,0x00,0x00,
-				    0x00,0x00,0x00,0x00,0x00,
-				    0x00,0x00,0x00,0x00,0x00,
-				    0x00,0x00,0x00,0x00,0x00,
-				    0x00,0x00,0x00,0x00,0x00};
-
-static unsigned char TAB_0_25[]={0,5,10,15,20,25};
-
+static unsigned short u,v;
 static unsigned char pix_cnt;
 static unsigned char curr_word;
-static unsigned char u,v;
+
 extern unsigned char* fontm23;
+extern unsigned short* fontm23_bold;
 
 /**
  * Initialize terminal state
@@ -259,6 +244,19 @@ void terminal_char_load(padWord charNum, charData theChar)
 	    }
 	}
     }
+
+  for (curr_word=0;curr_word<8;curr_word++)
+    {
+      for (u=16; u-->0; )
+	{
+	  if (theChar[curr_word] & 1<<u)
+	    {
+	      bold_char_data[u^0x0F&0x0F]|=DBLORTAB[curr_word];
+	      bold_char_data[(u+1)^0x0F&0x0fF]|=DBLORTAB[curr_word];
+	    }
+	}      
+    }
+  
   
   fontm23[(charNum)+0]=char_data[0];
   fontm23[(charNum)+128]=char_data[1];
@@ -272,6 +270,32 @@ void terminal_char_load(padWord charNum, charData theChar)
   fontm23[(charNum)+1152]=char_data[12];
   fontm23[(charNum)+1280]=char_data[13];
   fontm23[(charNum)+1408]=char_data[14]|char_data[15];
+
+  // Put bold_char_data into bold character set.
+  fontm23_bold[(charNum)+0]=bold_char_data[0];
+  fontm23_bold[(charNum)+128]=bold_char_data[1];
+  fontm23_bold[(charNum)+256]=bold_char_data[2];
+  fontm23_bold[(charNum)+384]=bold_char_data[3];
+  fontm23_bold[(charNum)+512]=bold_char_data[4]|bold_char_data[5];
+  fontm23_bold[(charNum)+640]=bold_char_data[6]|bold_char_data[7];
+  fontm23_bold[(charNum)+768]=bold_char_data[8];
+  fontm23_bold[(charNum)+896]=bold_char_data[9];
+  fontm23_bold[(charNum)+1024]=bold_char_data[10];
+  fontm23_bold[(charNum)+1152]=bold_char_data[11];
+  fontm23_bold[(charNum)+1280]=bold_char_data[12]|bold_char_data[13];
+  fontm23_bold[(charNum)+1408]=bold_char_data[14]|bold_char_data[15];
+  fontm23_bold[(charNum)+1536]=bold_char_data[16];
+  fontm23_bold[(charNum)+1664]=bold_char_data[17];
+  fontm23_bold[(charNum)+1792]=bold_char_data[18];
+  fontm23_bold[(charNum)+1920]=bold_char_data[19];
+  fontm23_bold[(charNum)+2048]=bold_char_data[20]|bold_char_data[21];
+  fontm23_bold[(charNum)+2176]=bold_char_data[22]|bold_char_data[23];
+  fontm23_bold[(charNum)+2304]=bold_char_data[24];
+  fontm23_bold[(charNum)+2432]=bold_char_data[25];
+  fontm23_bold[(charNum)+2560]=bold_char_data[26];
+  fontm23_bold[(charNum)+2688]=bold_char_data[27];
+  fontm23_bold[(charNum)+2816]=bold_char_data[28]|bold_char_data[29];
+  fontm23_bold[(charNum)+2944]=bold_char_data[30]|bold_char_data[31];  
 }
 
 /**

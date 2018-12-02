@@ -46,6 +46,7 @@ unsigned long current_background=0;
 padRGB current_foreground_rgb={255,255,255};
 padRGB current_background_rgb={0,0,0};
 unsigned char* fontm23;
+unsigned short* fontm23_bold;
 unsigned char is_mono=0;
 unsigned char highest_color_index=0;
 padRGB palette[16];
@@ -87,11 +88,6 @@ struct NewWindow winlayout = {
   640,400,
   CUSTOMSCREEN
 };
-
-struct TextAttr plato_ta = {"PLATO.font",12,0,0};
-struct TextAttr plato_bold_ta = {"PLATO.font",24,0,0};
-struct TextFont* platoFont;
-struct TextFont* platoBoldFont;
 
 /* All of this is needed if we don't want area fills that are slower than
  * grandma on Nyquil. 
@@ -158,22 +154,18 @@ void screen_init(void)
   }
 
   /* end of scratch space init XXX! add error checking */
-  platoFont=OpenDiskFont(&plato_ta);
-
-  if (!platoFont)
-    done();
-
-  platoBoldFont=OpenDiskFont(&plato_bold_ta);
-
-  if (!platoBoldFont)
-    done();
-
+  font_init_platoFont();
+  font_init_platoBoldFont();
   font_init_platoUserFont();
+  font_init_platoBoldUserFont();
+  AddFont(&platoFont);
+  AddFont(&platoBoldFont);
   AddFont(&platoUserFont);
+  AddFont(&platoBoldUserFont);
   
-  // This is probably very wrong, but...hey...
+  // Reach into the font strike data...
   fontm23=(unsigned char*)platoUserFont.tf_CharData;
-  fontm23[2]=0xFF;
+  fontm23_bold=(unsigned short*)platoBoldUserFont.tf_CharData;
 }
 
 /**
@@ -381,24 +373,30 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
     {
     case M0:
       if (ModeBold)
-	SetFont(myWindow->RPort,platoBoldFont);
+	SetFont(myWindow->RPort,&platoBoldFont);
       else
-	SetFont(myWindow->RPort,platoFont);
+	SetFont(myWindow->RPort,&platoFont);
       offset=0;
       break;
     case M1:
       if (ModeBold)
-	SetFont(myWindow->RPort,platoBoldFont);
+	SetFont(myWindow->RPort,&platoBoldFont);
       else
-	SetFont(myWindow->RPort,platoFont);
+	SetFont(myWindow->RPort,&platoFont);
       offset=96;
       break;
     case M2:
-      SetFont(myWindow->RPort,&platoUserFont);
+      if (ModeBold)
+	SetFont(myWindow->RPort,&platoBoldUserFont);
+      else
+	SetFont(myWindow->RPort,&platoUserFont);
       offset=-32;
       break;
     case M3:
-      SetFont(myWindow->RPort,&platoUserFont);
+      if (ModeBold)
+	SetFont(myWindow->RPort,&platoBoldUserFont);
+      else
+	SetFont(myWindow->RPort,&platoUserFont);
       offset=32;
       break;
     }
@@ -554,12 +552,8 @@ void screen_paint(padPt* Coord)
  */
 void screen_done(void)
 {
-  if (platoFont)
-    CloseFont(platoFont);
-
-  if (platoBoldFont)
-    CloseFont(platoBoldFont);
-
+  RemFont(&platoFont);
+  RemFont(&platoBoldFont);
   RemFont(&platoUserFont);
   
   if (myWindow)
