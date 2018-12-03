@@ -525,7 +525,6 @@ void screen_foreground(padRGB* theColor)
   current_foreground=screen_color_matching(theColor);
   screen_update_colors();
   SetAPen(myWindow->RPort,current_foreground);
-  palette_debug_update();
 }
 
 /**
@@ -539,7 +538,6 @@ void screen_background(padRGB* theColor)
   current_background=screen_color_matching(theColor);
   screen_update_colors();
   SetAPen(myWindow->RPort,current_foreground);
-  palette_debug_update();
 }
 
 /**
