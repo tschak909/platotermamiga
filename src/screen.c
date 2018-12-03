@@ -28,6 +28,8 @@
 #include "protocol.h"
 #include "scale.h"
 #include "font.h"
+#include "palette_debug.h"
+
 #ifdef __VBCC__
 #undef NULL
 #define NULL 0L
@@ -541,7 +543,8 @@ void screen_foreground(padRGB* theColor)
   current_foreground_rgb.blue=theColor->blue;
   current_foreground=screen_color_matching(theColor);
   screen_update_colors();
-  screen_dump_palette();
+  SetAPen(myWindow->RPort,current_foreground);
+  palette_debug_update();
 }
 
 /**
@@ -554,7 +557,8 @@ void screen_background(padRGB* theColor)
   current_background_rgb.blue=theColor->blue;
   current_background=screen_color_matching(theColor);
   screen_update_colors();
-  screen_dump_palette();
+  SetAPen(myWindow->RPort,current_foreground);
+  palette_debug_update();
 }
 
 /**

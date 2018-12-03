@@ -10,6 +10,7 @@
 #include "touch.h"
 #include "menu.h"
 #include "help.h"
+#include "palette_debug.h"
 
 #define true 1
 #define false 0
@@ -45,6 +46,7 @@ int main(void)
 void done(void)
 {
   help_done();
+  palette_debug_done();
   io_done();
   sound_done();
   screen_done();

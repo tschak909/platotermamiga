@@ -19,6 +19,7 @@
 #include "menu.h"
 #include "help.h"
 #include "touch.h"
+#include "palette_debug.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
@@ -66,10 +67,13 @@ void keyboard_main(void)
       if (intuition_msg->Class == IDCMP_CLOSEWINDOW) {
           struct Window *tmp;
           extern struct Window *windowHelpKeys;
+	  extern struct Window *windowPaletteDebug;
           tmp = intuition_msg->IDCMPWindow;
           ReplyMsg((struct Message *) intuition_msg);
           if(tmp == windowHelpKeys) /* Oh, hey it's our help window, close it */
-              help_done();
+	    help_done();
+	  else if (tmp==windowPaletteDebug)
+	    palette_debug_done();
           continue; /* Once we've replied we can't do anything else with the struct */
       }
       else if (intuition_msg->Class == MOUSEBUTTONS)
@@ -94,6 +98,11 @@ void keyboard_main(void)
 	      else if (intuition_msg->Code=='k')
 		{
 		  help_keys_show();
+		}
+	      else if (intuition_msg->Code=='l')
+		{
+		  palette_debug_show();
+		  palette_debug_update();
 		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
@@ -150,6 +159,11 @@ void keyboard_main(void)
 	    else if (menuNum==3&&itemNum==0&&subNum==31)
 	      {
 		help_keys_show();
+	      }
+	    else if (menuNum==3&&itemNum==1&&subNum==31)
+	      {
+		palette_debug_show();
+		palette_debug_update();
 	      }
             menuNumber = item->NextSelect;
           }

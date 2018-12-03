@@ -167,11 +167,18 @@ static struct MenuItem itemPLATOMode =
 /**
  * Help menu
  */
+
+static struct IntuiText textPaletteDebug =
+  {0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "Show Palette...", NULL};
+
+static struct MenuItem itemPaletteDebug =
+  { NULL, 0, 12, WIDTH_HELP_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textPaletteDebug, &textPaletteDebug, 'L',    NULL, 0 };
+
 static struct IntuiText textHelpKeys =
   {0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "PLATO Keys...", NULL};
 
 static struct MenuItem itemHelpKeys =
-  { NULL, 0, 0, WIDTH_HELP_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textHelpKeys, &textHelpKeys, 'K',    NULL, 0 };
+  { &itemPaletteDebug, 0, 0, WIDTH_HELP_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textHelpKeys, &textHelpKeys, 'K',    NULL, 0 };
 
 /**
  * The menu strip 
