@@ -35,7 +35,7 @@ struct NewWindow windowPaletteDebugLayout = {
   265, 32,
   0,1,
   0L, /* we don't want any IDCMP, we will set this up later */
-  WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR|WFLG_SMART_REFRESH,
+  WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR|WFLG_DEPTHGADGET|WFLG_SMART_REFRESH,
   NULL, NULL,
   "PLATO Palette",
   NULL,NULL,
