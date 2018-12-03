@@ -28,29 +28,6 @@ struct IntuiMessage* help_intuition_msg;
 
 struct Window *windowHelpKeys;
 
-/* The coordinates for the box: */
-SHORT my_points[]=
-{
-   0,  0, /* Start at position (0,0) */
-  70,  0, /* Draw a line to the right to position (70,0) */
-  70, 10, /* Draw a line down to position (70,10) */
-   0, 10, /* Draw a line to the right to position (0,10) */
-   0,  0  /* Finish of by drawing a line up to position (0,0) */ 
-};
-
-/* The Border structure: */
-struct Border my_border=
-{
-  0, 0,        /* LeftEdge, TopEdge. */
-  1,           /* FrontPen, colour register 1. */
-  0,           /* BackPen, for the moment unused. */
-  JAM1,        /* DrawMode, draw the lines with colour 1. */
-  5,           /* Count, 5 pair of coordinates in the array. */
-  my_points,   /* XY, pointer to the array with the coordinates. */
-  NULL,        /* NextBorder, no other Border structures are connected. */
-};
-
-
 /**
  * IntuiText contents
  */
