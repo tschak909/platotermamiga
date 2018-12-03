@@ -1,0 +1,35 @@
+VBCC=/opt/vbcc
+NDK_INC=/opt/amiga/m68k-amigaos/ndk-include
+TARGET_EXEC := PLATOTerm
+BUILD_DIR := ./build
+SRC_DIRS := ./src
+
+CC = vc
+
+SRCS := $(shell find $(SRC_DIRS) -name *.c)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := -I$(NDK_INC) $(addprefix -I,$(INC_DIRS))
+
+CPPFLAGS ?= +kick13 -c99 $(INC_FLAGS) 
+LDFLAGS := -lamiga -lauto -lm13 
+
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CC) $(CPPFLAGS) $(OBJS) -o $@ $(LDFLAGS)
+
+# c source
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+.PHONY: clean
+
+clean:
+	$(RM) -r $(BUILD_DIR)
+	$(RM) $(SRC_DIRS)/*.dep
+
+-include $(DEPS)
+
+MKDIR_P ?= mkdir -p
