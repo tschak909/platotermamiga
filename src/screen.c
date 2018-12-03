@@ -486,25 +486,6 @@ void screen_tty_char(padByte theChar)
 }
 
 /**
- * screen_dump_palette
- */
-unsigned char screen_dump_palette(void)
-{
-#ifdef PALETTE_DEBUG
-  unsigned char i;
-  for (i=0;i<16;i++)
-    {
-      SetAPen(myWindow->RPort,i);
-      SetOPen(myWindow->RPort,15);
-      RectFill(myWindow->RPort,
-	       i*16,375-16,
-	       i*16+16,375);
-    }
-#endif /* PALETTE_DEBUG */
-  SetAPen(myWindow->RPort,current_foreground);
-}
-
-/**
  * screen_color_matching(color) - return index of matching color, or a new index, 
  * if not found.
  */
