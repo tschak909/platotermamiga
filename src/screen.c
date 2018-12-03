@@ -298,6 +298,8 @@ void screen_clear(void)
   highest_color_index=0;
   screen_clear_palette();
 
+  current_foreground=current_background=0;
+  
   palette[0].red=current_background_rgb.red;
   palette[0].green=current_background_rgb.green;
   palette[0].blue=current_background_rgb.blue;
@@ -310,6 +312,7 @@ void screen_clear(void)
       palette[1].green=current_foreground_rgb.green;
       palette[1].blue=current_foreground_rgb.blue;
       highest_color_index++;
+      current_foreground=1;
     }
 
   screen_update_colors();
@@ -485,6 +488,17 @@ void screen_tty_char(padByte theChar)
  */
 unsigned char screen_dump_palette(void)
 {
+#ifdef PALETTE_DEBUG
+  unsigned char i;
+  for (i=0;i<16;i++)
+    {
+      SetAPen(myWindow->RPort,i);
+      SetOPen(myWindow->RPort,15);
+      RectFill(myWindow->RPort,
+	       i*16,375-16,
+	       i*16+16,375);
+    }
+#endif /* PALETTE_DEBUG */
   SetAPen(myWindow->RPort,current_foreground);
 }
 
@@ -522,6 +536,9 @@ unsigned char screen_color_matching(padRGB* theColor)
  */
 void screen_foreground(padRGB* theColor)
 {
+  current_foreground_rgb.red=theColor->red;
+  current_foreground_rgb.green=theColor->green;
+  current_foreground_rgb.blue=theColor->blue;
   current_foreground=screen_color_matching(theColor);
   screen_update_colors();
   screen_dump_palette();
@@ -532,6 +549,9 @@ void screen_foreground(padRGB* theColor)
  */
 void screen_background(padRGB* theColor)
 {
+  current_background_rgb.red=theColor->red;
+  current_background_rgb.green=theColor->green;
+  current_background_rgb.blue=theColor->blue;
   current_background=screen_color_matching(theColor);
   screen_update_colors();
   screen_dump_palette();
