@@ -74,7 +74,7 @@ void terminal_init(void)
 void terminal_initial_position(void)
 {
   TTYLoc.x=0;
-  TTYLoc.y=320;
+  TTYLoc.y=240;
 }
 
 /**
@@ -89,7 +89,7 @@ void terminal_set_tty(void)
   Rotate=padF;
   Reverse=padF;
   CurMem=M0;
-  CurMode=ModeRewrite;
+  CurMode=ModeWrite;
   CharWide=8;
   CharHigh=16;
   TTYLoc.x = 0;

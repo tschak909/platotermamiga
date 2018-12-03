@@ -236,6 +236,9 @@ Key (padWord theKey)
 
 void	Touch(padPt* where)
 {
+  if (TTY)
+    return; /* Do not send touch in TTY */
+  
   io_send_byte(0x1b);
   io_send_byte(0x1f);
   io_send_byte(0x40 + (where->x & 0x1f));
