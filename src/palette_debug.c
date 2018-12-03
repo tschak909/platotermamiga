@@ -96,13 +96,13 @@ void palette_debug_update(void)
   if (palette_debug_is_open==0)
     return;
   
-  for (i=0;i<16;i++)
+  for (i=0;i<8;i++)
     {
       SetAPen(windowPaletteDebug->RPort,i);
       SetOPen(windowPaletteDebug->RPort,15);
       RectFill(windowPaletteDebug->RPort,
-	       i*16+4,12,
-	       i*16+16+4,28);
+	       i*32+4,12,
+	       i*32+16+4,28);
     }
   BNDRYOFF(windowPaletteDebug->RPort);
 }
