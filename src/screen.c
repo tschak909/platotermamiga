@@ -65,7 +65,7 @@ struct IntuitionBase *IntuitionBase;
 struct GfxBase *GfxBase;
 
 struct NewScreen Screen1 = {
-  0,0,640,400,3,             /* Screen of 640 x 400 of depth 8 (2^4 = 16 colours)    */
+  0,0,640,400,3,             /* Screen of 640 x 400 of depth 3 (2^3 = 8 colours)    */
   DETAILPEN, BLOCKPEN,
   HIRES|LACE,                     /* see graphics/view.h for view modes */
   PUBLICSCREEN,              /* Screen types */
