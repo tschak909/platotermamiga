@@ -116,9 +116,7 @@ void screen_init(void)
   /* before we start messing with the screen, lets check out much
    * chipram we have available. so we can do things like close the workbench */
   chipram = AvailMem(MEMF_CHIP|MEMF_LARGEST);
-  if(chipram <= 319136){
-      lowmem_flag = 1;
-  }
+  lowmem_flag = chipram <= 319136;
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 34);
 
   if (!IntuitionBase)
@@ -129,7 +127,7 @@ void screen_init(void)
   if (!GfxBase)
     done();
 
-  if(lowmem_flag) /* low memory detcted close the workbench to help free memory */
+  if (lowmem_flag) /* low memory detcted close the workbench to help free memory */
       CloseWorkBench();
 
   myScreen = OpenScreen(&Screen1);
