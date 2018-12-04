@@ -188,6 +188,7 @@ InitPLATOx (void)
   FastText = true;
   CurMem = M0;
   CurMode = ModeRewrite;
+  FlowControl=true;
   screen_update_title();
   menu_toggle_plato_mode(1);
 }

@@ -65,7 +65,7 @@ struct IntuitionBase *IntuitionBase;
 struct GfxBase *GfxBase;
 
 struct NewScreen Screen1 = {
-  0,0,640,400,4,             /* Screen of 640 x 400 of depth 8 (2^4 = 16 colours)    */
+  0,0,640,400,3,             /* Screen of 640 x 400 of depth 3 (2^3 = 8 colours)    */
   DETAILPEN, BLOCKPEN,
   HIRES|LACE,                     /* see graphics/view.h for view modes */
   PUBLICSCREEN,              /* Screen types */
@@ -176,7 +176,7 @@ void screen_init(void)
 void screen_update_colors(void)
 {
   long i=0;
-  for (i=0;i<16;i++)
+  for (i=0;i<8;i++)
     {
       unsigned long r=palette[i].red   >> 4;
       unsigned long g=palette[i].green >> 4;
@@ -278,7 +278,7 @@ void screen_about(void)
 void screen_clear_palette(void)
 {
   int i;
-  for (i=0;i<16;i++)
+  for (i=0;i<8;i++)
     {
       palette[i].red=0;
       palette[i].green=0;
@@ -287,9 +287,9 @@ void screen_clear_palette(void)
 
   /* Set complement color of 1 for HIGHCOMP */
   /* so menu texts are visible. */
-  palette[15].red=255;
-  palette[15].green=255;
-  palette[15].blue=255;
+  palette[7].red=255;
+  palette[7].green=255;
+  palette[7].blue=255;
 }
 
 /**
@@ -492,7 +492,7 @@ void screen_tty_char(padByte theChar)
 unsigned char screen_color_matching(padRGB* theColor)
 {
   unsigned char i;
-  for (i=0;i<16;i++)
+  for (i=0;i<8;i++)
     {
       if (i>highest_color_index)
 	{
