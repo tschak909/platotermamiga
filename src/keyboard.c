@@ -20,6 +20,7 @@
 #include "help.h"
 #include "touch.h"
 #include "palette_debug.h"
+#include "requester_devices.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
@@ -164,6 +165,10 @@ void keyboard_main(void)
 	      {
 		palette_debug_show();
 		palette_debug_update();
+	      }
+	    else if (menuNum==2&&itemNum==0&&subNum==31)
+	      {
+		requester_devices_run();
 	      }
             menuNumber = item->NextSelect;
           }
