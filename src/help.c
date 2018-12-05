@@ -107,9 +107,9 @@ struct NewWindow windowHelpKeysLayout = {
   136, 236,
   0,1,
   0L, /* we don't want any IDCMP, we will set this up later */
-  WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR,
+  WFLG_ACTIVATE|WFLG_CLOSEGADGET|WFLG_DRAGBAR|WFLG_DEPTHGADGET,
   &my_gadget, NULL,
-  "PLATO Keys",
+  "Keys",
   NULL,NULL,
   16,16,
   160,384,
