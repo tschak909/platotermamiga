@@ -206,6 +206,16 @@ struct Gadget device_string_gadget=
 extern struct Window* myWindow;
 
 /* The coordinates for the box: */
+
+SHORT buttonBorderBold_points[]=
+{
+   -1,  -1, /* Start at position (0,0) */
+  71,  1, /* Draw a line to the right to position (70,0) */
+  71, 21, /* Draw a line down to position (70,10) */
+   -1, 21, /* Draw a line to the right to position (0,10) */
+   -1,  -1  /* Finish of by drawing a line up to position (0,0) */ 
+};
+
 SHORT buttonBorder_points[]=
 {
    0,  0, /* Start at position (0,0) */
@@ -225,6 +235,18 @@ struct Border buttonBorder=
   5,           /* Count, 5 pair of coordinates in the array. */
   buttonBorder_points, /* XY, pointer to the array with the coord. */
   NULL,        /* NextBorder, no other Border structures are connected. */
+};
+
+/* The Border structure: */
+struct Border buttonBorderBold=
+{
+  1, 1,        /* LeftEdge, TopEdge. */
+  1,           /* FrontPen, colour register 1. */
+  0,           /* BackPen, for the moment unused. */
+  JAM1,        /* DrawMode, draw the lines with colour 1. */
+  5,           /* Count, 5 pair of coordinates in the array. */
+  buttonBorder_points, /* XY, pointer to the array with the coord. */
+  &buttonBorder,        /* NextBorder, no other Border structures are connected. */
 };
 
 struct IntuiText applyText=
@@ -254,7 +276,7 @@ struct IntuiText cancelText=
 struct Gadget devicesRequesterGadget_cancel =
 {
   &device_string_gadget,          /* NextGadget, no more gadgets in the list. */
-  160,            /* LeftEdge, 40 pixels out. */
+  80,            /* LeftEdge, 40 pixels out. */
   70,            /* TopEdge, 20 lines down. */
   71,            /* Width, 71 pixels wide. */
   21,            /* Height, 11 pixels lines heigh. */
@@ -293,7 +315,7 @@ struct Gadget devicesRequesterGadget_cancel =
 struct Gadget devicesRequesterGadget_apply=
 {
   &devicesRequesterGadget_cancel,          /* NextGadget, no more gadgets in the list. */
-  80,            /* LeftEdge, 40 pixels out. */
+  160,            /* LeftEdge, 40 pixels out. */
   70,            /* TopEdge, 20 lines down. */
   71,            /* Width, 71 pixels wide. */
   21,            /* Height, 11 pixels lines heigh. */
@@ -316,7 +338,7 @@ struct Gadget devicesRequesterGadget_apply=
   REQGADGET,     /* a requester. IMPORTANT! Every gadget which is */
                  /* connectd to a requester must have the REQGADGET flsg */
                  /* set in the GadgetType field. */
-  (APTR) &buttonBorder, /* GadgetRender, a pointer to our Border struc. */
+  (APTR) &buttonBorderBold, /* GadgetRender, a pointer to our Border struc. */
   NULL,          /* SelectRender, NULL since we do not supply the gadget */
                  /* with an alternative image. (We complement the */
                  /* colours instead) */
