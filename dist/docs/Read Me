@@ -1,0 +1,104 @@
+PLATOTerm 0.2 Smoke Test for Amiga Users
+========================================
+
+This version is for users with WIFI modems connected to their RS-232
+serial port. It uses the default serial.device, for now.
+
+Changes since 0.1
+-----------------
+
+There is a new Amiga splash screen, in this version.
+
+The font requirement in the previous release has been removed, as
+the required font data is now embedded within the program. Also,
+as a result, the installer script is no longer needed, and has
+been removed from the 2.x version of the disk.
+
+Note: This is a test release, intended to test whether PLATOTerm works
+outside of emulation. The program is still being developed, and many
+user interface features are missing. If you can help with finishing
+development, please fork the repository on GitHub. Otherwise, please
+test, and let us know in the Issues if the terminal adversely does not
+at the very least:
+
+Please test
+-----------
+
+* Set your baud rate in Serial Preferences (be sure to set RTS/CTS if
+you can use it!)
+* Set your serial buffer size large enough (e.g. 4000 bytes)
+* Start up
+* Communicate with your modem (AT OK)
+* Connect to IRATA.ONLINE
+* Reliably transfer data at the chosen baud rate and buffer settings.
+* Properly exit the program.
+* Ensure that the Keys and Palette windows in Help work correctly.
+
+
+Loading PLATOTerm
+-----------------
+Once installed, PLATOTerm can be accessed simply by clicking on its
+icon. The icon is a drawing of a Magnavox PLATO IV terminal, from 1974,
+and is widely regarded as the iconic PLATO terminal. If you have a
+better icon, please contribute!
+
+Using PLATOTerm
+---------------
+PLATOTerm will then display a splash screen, indicating that it is
+ready for use.
+
+Once you see this splash screen, the terminal is ready for use, and you
+can send commands to your WIFI modem, to connect to a PLATO service,
+such as IRATA.ONLINE:
+
+ATDTIRATA.ONLINE:8005
+
+or, CYBER1.ORG
+
+ATDTCYBERSERV.ORG:8005
+
+For this initial testing release, the baud rate is set in Preferences.
+Be sure to set your baud rate and receive buffer size large enough
+(at least 4000 bytes). The menu items for setting these parameters
+are still being worked on, and are currently not functional.
+
+PLATO Keyboard
+--------------
+The PLATO keyboard is mapped to the Amiga keys, in this manner:
+
+-----------------------------------------
+| PLATO KEY             | Amiga Key     |
+-----------------------------------------
+| ANS                   | CTRL-A        |
+| BACK                  | CTRL-B        |
+| SHIFT-BACK            | CTRL-SHIFT-B  |
+| COPY                  | CTRL-C        |
+| SHIFT-COPY            | CTRL-SHIFT-C  |
+| DATA                  | CTRL-D        |
+| SHIFT-DATA            | SHIFT-CTRL-D  |
+| EDIT                  | CTRL-E        |
+| SHIFT-EDIT            | SHIFT-CTRL-E  |
+| FONT                  | CTRL-F        |
+| DIVIDE                | CTRL-G        |
+| HELP                  | CTRL-I        |
+| SHIFT-HELP            | SHIFT CTRL-H  |
+| LAB                   | CTRL-L        |
+| SHIFT-LAB             | SHIFT-CTRL-L  |
+| SUPER                 | CTRL-P        |
+| SHIFT-SUPER           | SHIFT CTRL-P  |
+| SQUARE                | CTRL-Q        |
+| ACCESS                | SHIFT CTRL-Q  |
+| STOP                  | CTRL-S        |
+| SHIFT-STOP            | SHIFT CTRL-S  |
+| TERM                  | CTRL-T        |
+| MULTIPLY              | CTRL-X        |
+| SUB                   | CTRL-Y        |
+| SHIFT-SUB             | SHIFT CTRL-Y  |
+-----------------------------------------
+
+Problems?
+-----------
+This is early test software. If you have problems, please raise an
+issue, and I will address them and cut a new release. I am releasing
+this early and often so that everyone can test, and we can in the end,
+end up with a better piece of software, faster.

@@ -28,6 +28,24 @@ $(BUILD_DIR)/%.c.o: %.c
 clean:
 	$(RM) -r $(BUILD_DIR)
 	$(RM) $(SRC_DIRS)/*.dep
+	rm -rf dist/1.x/PLATOTerm
+	rm -rf dist/1.x/PLATOTerm.info
+	rm -rf dist/1.x/PLATOTerm.adf
+	rm -rf dist/2.x/PLATOTerm
+	rm -rf dist/2.x/PLATOTerm.info
+	rm -rf dist/2.x/PLATOTerm.adf
+
+dist: clean build/PLATOTerm
+	cp dist/1.x/files/template.adf dist/1.x/PLATOTerm.adf
+	cp build/PLATOTerm dist/1.x/PLATOTerm
+	cp dist/1.x/files/PLATOTerm.info dist/1.x/PLATOTerm.info
+	xdftool dist/1.x/PLATOTerm.adf write build/PLATOTerm /
+	xdftool dist/1.x/PLATOTerm.adf write "dist/docs/Read Me" /
+	cp dist/2.x/files/template.adf dist/2.x/PLATOTerm.adf
+	cp build/PLATOTerm dist/2.x/PLATOTerm
+	cp dist/1.x/files/PLATOTerm.info dist/2.x/PLATOTerm.info
+	xdftool dist/2.x/PLATOTerm.adf write build/PLATOTerm /
+	xdftool dist/2.x/PLATOTerm.adf write "dist/docs/Read Me" /
 
 -include $(DEPS)
 
