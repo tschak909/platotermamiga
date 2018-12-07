@@ -63,7 +63,7 @@ void prefs_save(void)
 
   Write(fileHandle,&config,sizeof(config));
   Close(fileHandle);
-  sprintf(comment,"%s:%lu, %lu baud, bufsize: %lu, paint: %u wbench: %u",
+  sprintf(comment,"%s:%d, %d baud, bufsize: %d, paint: %d wbench: %d",
 	  config.device_name,
 	  config.unit_number,
 	  config.io_Baud,
