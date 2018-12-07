@@ -315,8 +315,25 @@ void screen_clear(void)
       current_foreground=1;
     }
 
+  // Finally, a fall back, if somehow, color 0 and color 1 are black, fix it.
+  if ((palette[1].red==0) &&
+      (palette[1].green==0) &&
+      (palette[1].blue==0) &&
+      (palette[0].red==0) &&
+      (palette[0].green==0) &&
+      (palette[0].blue==0))
+    {
+      palette[0].red=palette[0].green=palette[0].blue=0;
+      palette[1].red=palette[1].green=palette[1].blue=255;
+      current_foreground=1;
+      current_background=0;
+      current_foreground_rgb.red=current_foreground_rgb.green=current_foreground_rgb.blue=255;
+      current_background_rgb.red=current_foreground_rgb.green=current_foreground_rgb.blue=0;
+    }
+  
   screen_update_colors();
   SetRast(myWindow->RPort,current_background);
+  SetAPen(myWindow->RPort,current_foreground);
 }
 
 /**
