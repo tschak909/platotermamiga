@@ -27,12 +27,13 @@ BPTR fileHandle;
  */
 void prefs_set_defaults(void)
 {
-  config.io_Baud=9600;
+  config.io_Baud=1200;
   config.io_RBufLen=4000;
   strcpy(config.device_name,"serial.device");
   config.unit_number=0;
   config.paint_enabled=1;
   config.close_workbench=1;
+  config.rtscts_enabled=1;
   prefs_save();
 }
 

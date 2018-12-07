@@ -11,6 +11,7 @@ typedef struct _configInfo
 {
   unsigned long io_Baud;              /* Baud Rate from IOExtSer */
   unsigned long io_RBufLen;           /* Read buffer size from IOExtSer */
+  unsigned long rtscts_enabled;       /* RTS/CTS enabled? */
   unsigned char device_name[30];      /* Serial device name */
   unsigned long unit_number;          /* unit number */
   unsigned char paint_enabled;        /* is paint enabled? */

@@ -51,10 +51,31 @@ void io_init(void)
   
   if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
     done();
+
+  /* Set parameters from prefs */
+  ms->readio->io_RBufLen=config.io_RBufLen;
+  ms->readio->io_Baud=config.io_Baud;
+  ms->readio->io_ReadLen=8;
+  ms->readio->io_WriteLen=8;
+  ms->readio->io_StopBits=1;
+  ms->readio->io_SerFlags=SERF_XDISABLED|SERF_RAD_BOOGIE;
+
+  if (config.rtscts_enabled==1)
+    ms->readio->io_SerFlags|=SERF_7WIRE;
   
   ms->writeio->IOSer.io_Device=ms->readio->IOSer.io_Device;
   ms->writeio->IOSer.io_Unit = ms->readio->IOSer.io_Unit;
+  ms->writeio->io_RBufLen=config.io_RBufLen;
+  ms->writeio->io_Baud=config.io_Baud;
+  ms->writeio->io_ReadLen=8;
+  ms->writeio->io_WriteLen=8;
+  ms->writeio->io_StopBits=1;
+  ms->writeio->io_SerFlags=ms->readio->io_SerFlags;
 
+  ms->readio->IOSer.io_Command = SDCMD_SETPARAMS;
+  if (DoIO((struct IORequest *)ms->readio))
+    done();
+  
   /* Serial port should be initialized, and open, at this point. */
   /* TBD: do baud rate setting */
 
