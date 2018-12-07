@@ -12,6 +12,7 @@
 
 #define PREFS_FILE "PLATOTermPrefs"
 
+#include <proto/exec.h>
 #include <proto/dos.h>
 #include <dos/dos.h>
 #include <string.h>
@@ -51,11 +52,26 @@ void prefs_load(void)
 }
 
 /**
+ * Format string for comment field.
+ */
+void prefs_comment(void)
+{
+  char comment[80]={"PLATOTerm Preferences File"};
+  /* sprintf(comment,"%s:%d, %d baud, bufsize: %d, paint: %d wbench: %d", */
+  /* 	  config.device_name, */
+  /* 	  config.unit_number, */
+  /* 	  config.io_Baud, */
+  /* 	  config.io_RBufLen, */
+  /* 	  config.paint_enabled, */
+  /* 	  config.close_workbench); */
+  SetComment(PREFS_FILE,comment);
+}
+
+/**
  * prefs_save() - Save the preferences file
  */
 void prefs_save(void)
 {
-  char comment[80];
   fileHandle=Open(PREFS_FILE,MODE_READWRITE);
 
   if (fileHandle==0)
@@ -63,14 +79,7 @@ void prefs_save(void)
 
   Write(fileHandle,&config,sizeof(config));
   Close(fileHandle);
-  sprintf(comment,"%s:%d, %d baud, bufsize: %d, paint: %d wbench: %d",
-	  config.device_name,
-	  config.unit_number,
-	  config.io_Baud,
-	  config.io_RBufLen,
-	  config.paint_enabled,
-	  config.close_workbench);
-  SetComment(PREFS_FILE,comment);
+  prefs_comment();
 }
 
 #endif /* PREFS_H */
