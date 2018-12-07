@@ -11,6 +11,7 @@
 #include "menu.h"
 #include "help.h"
 #include "palette_debug.h"
+#include "prefs.h"
 
 #define true 1
 #define false 0
@@ -23,6 +24,7 @@ extern struct Window* myWindow;
  
 int main(void)
 {
+  prefs_load();
   screen_init();
   menu_init();
   io_init();

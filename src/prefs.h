@@ -7,38 +7,22 @@
  * prefs.h - Preferences file functions
  */
 
-#ifndef PREFS_H
-#define PREFS_H
-
-typedef struct configInfo
+typedef struct _configInfo
 {
-  unsigned long io_Baud;     /* Baud Rate from IOExtSer */
-  unsigned long io_RBufLen;  /* Read buffer size from IOExtSer */
-  unsigned long io_WriteLen; /* Write buffer size from IOExtSer */
-  unsigned char device_name[128];     /* Serial device name */
+  unsigned long io_Baud;              /* Baud Rate from IOExtSer */
+  unsigned long io_RBufLen;           /* Read buffer size from IOExtSer */
+  unsigned char device_name[30];      /* Serial device name */
+  unsigned long unit_number;          /* unit number */
   unsigned char paint_enabled;        /* is paint enabled? */
   unsigned char close_workbench;      /* Close the Workbench? */
 } ConfigInfo;
 
-
 /**
  * prefs_open() - Open preferences file
  */
-void prefs_open(void);
-
-/**
- * prefs_close() - Close the preferences file
- */
-void prefs_close(void);
+void prefs_load(void);
 
 /**
  * prefs_save() - Save the preferences file
  */
 void prefs_save(void);
-
-/**
- * prefs_set_defaults() - Set default preferences
- */
-void prefs_set_defaults(void);
-
-#endif /* PREFS_H */

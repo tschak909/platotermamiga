@@ -15,6 +15,7 @@
 
 #include "io.h"
 #include "protocol.h"
+#include "prefs.h"
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
@@ -23,6 +24,7 @@
 
 unsigned char read_io_active=false;
 
+extern ConfigInfo config;
 extern void done(void);
 
 MySer* ms;
@@ -46,10 +48,10 @@ void io_init(void)
   ms->writeio = (struct IOExtSer *)CreateExtIO(ms->writeport, sizeof(struct IOExtSer));
   if (!ms->readio || !ms->writeio)
     done();
-
-  if (OpenDevice("serial.device",0,(struct IORequest*)ms->readio,0L))
+  
+  if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
     done();
-
+  
   ms->writeio->IOSer.io_Device=ms->readio->IOSer.io_Device;
   ms->writeio->IOSer.io_Unit = ms->readio->IOSer.io_Unit;
 
