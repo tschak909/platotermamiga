@@ -581,15 +581,17 @@ void screen_done(void)
   RemFont(&platoUserFont);
   
   if (myWindow)
-    /* deallocate tmpras and areainfo */
+    {
+      /* deallocate tmpras and areainfo */
       if(config.paint_enabled) {
         myWindow->RPort->TmpRas = 0L;
         FreeMem(tmpbuf,(long)rassize);
         myWindow->RPort->AreaInfo = 0L;
         FreeMem(areabuf,(long)AREABUF_SIZE);
       }
-    /* Now we can safely close the window */  
-    CloseWindow(myWindow);
+      /* Now we can safely close the window */  
+      CloseWindow(myWindow);
+    }
   if (myScreen)
     CloseScreen(myScreen);
   
