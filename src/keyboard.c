@@ -211,6 +211,10 @@ void keyboard_main(void)
 		{
 		  io_set_baud(115200);
 		}
+	      else if (menuNum==2&&itemNum==13&&subNum==31)
+		{
+		  io_toggle_rtscts();
+		}
 	      menuNumber = item->NextSelect;
 	    }
 	}

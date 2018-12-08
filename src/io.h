@@ -61,4 +61,9 @@ void io_done(void);
  */
 void io_set_baud(long baud_rate);
 
+/**
+ * io_toggle_rtscts(void) - Toggle RTS/CTS
+ */
+void io_toggle_rtscts(void);
+
 #endif /* IO_H */

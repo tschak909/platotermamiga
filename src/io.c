@@ -286,3 +286,18 @@ void io_set_baud(long baud_rate)
   
   screen_update_title();
 }
+
+/**
+ * io_toggle_rtscts(void) - Toggle RTS/CTS
+ */
+void io_toggle_rtscts(void)
+{
+  DisplayBeep(NULL);
+  config.rtscts_enabled^=1;
+  prefs_save();
+
+  io_done();
+  io_init();
+
+  screen_update_title();
+}
