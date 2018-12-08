@@ -21,6 +21,7 @@
 #include "touch.h"
 #include "palette_debug.h"
 #include "requester_devices.h"
+#include "prefs.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
@@ -28,6 +29,8 @@ unsigned char shift_state=0;
 extern void done(void);
 extern unsigned short scaletx[];
 extern unsigned short scalety[];
+extern unsigned char device_requester_is_active;
+extern struct Gadget devicesRequesterGadget_apply;
 
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
@@ -135,44 +138,56 @@ void keyboard_main(void)
 	  screen_update_title();
 	}
       /* handle menu selection messages */
-      else if (intuition_msg->Class == IDCMP_MENUPICK) {
+      else if (intuition_msg->Class == IDCMP_MENUPICK)
+	{
           menuNumber = intuition_msg->Code;
           menuNum = MENUNUM(menuNumber);
           itemNum = ITEMNUM(menuNumber);
           subNum = SUBNUM(menuNumber);
-          while(menuNumber != MENUNULL) {
-              item = ItemAddress(&menuTerminal,menuNumber); 
-            if(menuNum == 0 && itemNum == 3 && subNum == 31)
-	      {
-                done();
-	      }
-	    else if (menuNum==0&&itemNum==2&&subNum==31)
-	      {
-		screen_about();
-	      }
-	    else if (menuNum==0&&itemNum==0&&subNum==31)
-	      {
-		if (TTY==padT)
-		  InitPLATO();
-		else
-		  InitTTY();
-	      }
-	    else if (menuNum==3&&itemNum==0&&subNum==31)
-	      {
-		help_keys_show();
-	      }
-	    else if (menuNum==3&&itemNum==1&&subNum==31)
-	      {
-		palette_debug_show();
-		palette_debug_update();
-	      }
-	    else if (menuNum==2&&itemNum==0&&subNum==31)
-	      {
-		requester_devices_run();
-	      }
-            menuNumber = item->NextSelect;
-          }
-      }
+          while(menuNumber != MENUNULL)
+	    {
+	      item = ItemAddress(&menuTerminal,menuNumber); 
+	      if(menuNum == 0 && itemNum == 3 && subNum == 31)
+		{
+		  done();
+		}
+	      else if (menuNum==0&&itemNum==2&&subNum==31)
+		{
+		  screen_about();
+		}
+	      else if (menuNum==0&&itemNum==0&&subNum==31)
+		{
+		  if (TTY==padT)
+		    InitPLATO();
+		  else
+		    InitTTY();
+		}
+	      else if (menuNum==3&&itemNum==0&&subNum==31)
+		{
+		  help_keys_show();
+		}
+	      else if (menuNum==3&&itemNum==1&&subNum==31)
+		{
+		  palette_debug_show();
+		  palette_debug_update();
+		}
+	      else if (menuNum==2&&itemNum==0&&subNum==31)
+		{
+		  requester_devices_run();
+		}
+	      menuNumber = item->NextSelect;
+	    }
+	}
+      else if (device_requester_is_active==1)
+	{
+	  if (intuition_msg->Class==GADGETUP && intuition_msg->IAddress == (APTR) &devicesRequesterGadget_apply)
+	    {
+	      requester_devices_done();
+	      prefs_save();
+	      io_done();
+	      io_init();
+	    }
+	}
     }
 }
 

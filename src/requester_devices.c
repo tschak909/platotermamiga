@@ -9,7 +9,17 @@
 
 #include <intuition/intuition.h>
 #include <clib/intuition_protos.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include "requester_devices.h"
+#include "prefs.h"
+
+#undef NULL
+#define NULL 0
+
+extern ConfigInfo config;
+unsigned char device_requester_is_active=0;
 
 SHORT unit_string_border_points[]=
 {
@@ -49,8 +59,8 @@ struct IntuiText unit_string_text=
 
 
 
-UBYTE unit_name_buffer[8]="0"; /* 50 characters including the NULL-sign. */
-UBYTE unit_name_undo_buffer[8]; /* Must be at least as big as unit_name_buffer. */
+UBYTE unit_name_buffer[10]="0"; /* 50 characters including the NULL-sign. */
+UBYTE unit_name_undo_buffer[10]; /* Must be at least as big as unit_name_buffer. */
 
 
 
@@ -60,7 +70,7 @@ struct StringInfo unit_string_info=
   unit_name_undo_buffer,  /* UndoBuffer, pointer to a null-terminated string. */
                    /* (Remember unit_name_buffer is equal to &unit_name_buffer[0]) */
   0,               /* BufferPos, initial position of the cursor. */
-  8,              /* MaxChars, 50 characters + null-sign ('\0'). */
+  10,              /* MaxChars, 50 characters + null-sign ('\0'). */
   0,               /* DispPos, first character in the string should be */
                    /* first character in the display. */
 
@@ -71,7 +81,7 @@ struct StringInfo unit_string_info=
   0,               /* DispCount */
   0, 0,            /* CLeft, CTop */
   NULL,            /* LayerPtr */
-  NULL,            /* LongInt */
+  0,            /* LongInt */
   NULL,            /* AltKeyMap */
 };
 
@@ -90,7 +100,7 @@ struct Gadget unit_string_gadget=
                  /* highlighted, and the user will therefore not be able */
                  /* to see it. */
   GADGIMMEDIATE| /* Activation, our program will recieve a message when */
-  RELVERIFY,     /* the user has selected this gadget, and when the user */
+  RELVERIFY|LONGINT,     /* the user has selected this gadget, and when the user */
                  /* has released it. */ 
   STRGADGET|     /* GadgetType, a String gadget which is connected to */
   REQGADGET,     /* a requester. IMPORTANT! Every gadget which is */
@@ -100,7 +110,7 @@ struct Gadget unit_string_gadget=
   NULL,          /* SelectRender, NULL since we do not supply the gadget */
                  /* with an alternative image. */
   &unit_string_text,  /* GadgetText, a pointer to our IntuiText structure. */
-  NULL,          /* MutualExclude, no mutual exclude. */
+  0,          /* MutualExclude, no mutual exclude. */
   (APTR) &unit_string_info, /* SpecialInfo, a pointer to a StringInfo str. */
   0,             /* GadgetID, no id. */
   NULL           /* UserData, no user data connected to the gadget. */
@@ -168,7 +178,7 @@ struct StringInfo device_string_info=
   0,               /* DispCount */
   0, 0,            /* CLeft, CTop */
   NULL,            /* LayerPtr */
-  NULL,            /* LongInt */
+  0,            /* LongInt */
   NULL,            /* AltKeyMap */
 };
 
@@ -197,7 +207,7 @@ struct Gadget device_string_gadget=
   NULL,          /* SelectRender, NULL since we do not supply the gadget */
                  /* with an alternative image. */
   &device_string_text,  /* GadgetText, a pointer to our IntuiText structure. */
-  NULL,          /* MutualExclude, no mutual exclude. */
+  0,          /* MutualExclude, no mutual exclude. */
   (APTR) &device_string_info, /* SpecialInfo, a pointer to a StringInfo str. */
   0,             /* GadgetID, no id. */
   NULL           /* UserData, no user data connected to the gadget. */
@@ -305,7 +315,7 @@ struct Gadget devicesRequesterGadget_cancel =
                  /* colours instead) */
   &cancelText,  /* GadgetText, a pointer to our IntuiText structure. */
                  /* (See chapter 3 GRAPHICS for more information) */
-  NULL,          /* MutualExclude, no mutual exclude. */
+  0,          /* MutualExclude, no mutual exclude. */
   NULL,          /* SpecialInfo, NULL since this is a Boolean gadget. */
                  /* (It is not a Proportional/String or Integer gdget) */
   0,             /* GadgetID, no id. */
@@ -344,7 +354,7 @@ struct Gadget devicesRequesterGadget_apply=
                  /* colours instead) */
   &applyText,  /* GadgetText, a pointer to our IntuiText structure. */
                  /* (See chapter 3 GRAPHICS for more information) */
-  NULL,          /* MutualExclude, no mutual exclude. */
+  0,          /* MutualExclude, no mutual exclude. */
   NULL,          /* SpecialInfo, NULL since this is a Boolean gadget. */
                  /* (It is not a Proportional/String or Integer gdget) */
   0,             /* GadgetID, no id. */
@@ -404,7 +414,7 @@ static struct Requester devicesRequester =
   &devicesRequesterGadget_apply, /* ReqGadget, pointer to the first gadget. */
   &devicesRequesterBorder, /* ReqBorder, pointer to a Border structure. */
   &devicesRequesterText,   /* ReqText, pointer to a IntuiText structure. */
-  NULL,              /* Flags, no flags set. */
+  0,              /* Flags, no flags set. */
   0,                 /* BackFill, draw everything on an orange backgr. */
   NULL,              /* ReqLayer, used by Intuition. Set to NULL. */
   NULL,              /* ReqPad1, used by Intuition. Set to NULL. */
@@ -420,7 +430,11 @@ static struct Requester devicesRequester =
  */
 void requester_devices_run(void)
 {
+  unit_string_info.LongInt=config.unit_number;
+  sprintf(unit_name_buffer,"%ld",config.unit_number);
+  strcpy(device_name_buffer,config.device_name);
   Request(&devicesRequester,myWindow);
+  device_requester_is_active=1;
 }
 
 /** 
@@ -428,4 +442,7 @@ void requester_devices_run(void)
  */
 void requester_devices_done(void)
 {
+  device_requester_is_active=0;
+  strcpy(config.device_name,device_name_buffer);
+  config.unit_number=unit_string_info.LongInt;
 }

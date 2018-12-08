@@ -47,6 +47,7 @@ int main(void)
  */
 void done(void)
 {
+  DisplayBeep(NULL);
   help_done();
   palette_debug_done();
   io_done();

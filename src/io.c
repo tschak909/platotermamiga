@@ -9,9 +9,11 @@
 
 #include <clib/alib_protos.h>
 #include <clib/exec_protos.h>
+#include <clib/intuition_protos.h>
 #include <exec/memory.h>
 #include <exec/ports.h>
 #include <devices/serial.h>
+#include <stdio.h>
 
 #include "io.h"
 #include "protocol.h"
@@ -29,6 +31,10 @@ extern void done(void);
 
 MySer* ms;
 struct Message* io_msg;
+
+static UBYTE *alertSerialDeviceError =
+  "\x00\x70\x14" "Could not open the selected serial device!" "\x00\x01"
+  "\x00\x80\x24" "Press any Mouse Button to use defaults." "\x00";
 
 /**
  * io_init() - Set-up the I/O
@@ -50,7 +56,13 @@ void io_init(void)
     done();
   
   if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
-    done();
+    {
+      // failed, let's spit out an alert, and try the default device.
+      DisplayAlert(RECOVERY_ALERT,alertSerialDeviceError,52);
+      prefs_set_defaults();
+      if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
+	done();
+    }
 
   /* Set parameters from prefs */
   ms->readio->io_RBufLen=config.io_RBufLen;

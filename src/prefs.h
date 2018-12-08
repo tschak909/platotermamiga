@@ -27,3 +27,8 @@ void prefs_load(void);
  * prefs_save() - Save the preferences file
  */
 void prefs_save(void);
+
+/**
+ * Set default preferences
+ */
+void prefs_set_defaults(void);
