@@ -18,6 +18,8 @@ typedef struct _configInfo
   unsigned char close_workbench;      /* Close the Workbench? */
 } ConfigInfo;
 
+extern ConfigInfo config;
+
 /**
  * prefs_open() - Open preferences file
  */
