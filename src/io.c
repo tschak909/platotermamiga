@@ -28,7 +28,6 @@
 
 unsigned char read_io_active=false;
 
-extern ConfigInfo config;
 extern void done(void);
 
 MySer* ms;

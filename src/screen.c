@@ -29,6 +29,7 @@
 #include "scale.h"
 #include "font.h"
 #include "palette_debug.h"
+#include "prefs.h"
 
 #ifdef __VBCC__
 #undef NULL
@@ -127,7 +128,7 @@ void screen_init(void)
   if (!GfxBase)
     done();
 
-  if (lowmem_flag) /* low memory detcted close the workbench to help free memory */
+  if (lowmem_flag||config.close_workbench) /* low memory detcted close the workbench to help free memory */
       CloseWorkBench();
 
   myScreen = OpenScreen(&Screen1);
@@ -140,17 +141,19 @@ void screen_init(void)
   if (!myWindow)
     done();
   /* Initilize scratch space for area fill primitives */
-  rassize = RASSIZE(myWindow->GZZWidth,myWindow->GZZHeight);
-  if(tmpbuf = AllocMem(rassize,MEMF_CHIP|MEMF_CLEAR))
-  {
-    InitTmpRas(&tmpras,tmpbuf,rassize);
-    myWindow->RPort->TmpRas = &tmpras;
-  }
+  if(config.paint_enabled) {
+      rassize = RASSIZE(myWindow->GZZWidth,myWindow->GZZHeight);
+      if(tmpbuf = AllocMem(rassize,MEMF_CHIP|MEMF_CLEAR))
+      {
+        InitTmpRas(&tmpras,tmpbuf,rassize);
+        myWindow->RPort->TmpRas = &tmpras;
+      }
   
-  if(areabuf = AllocMem(AREABUF_SIZE,MEMF_CLEAR))
-  {
-      InitArea(&areainfo,areabuf,MAXVEC);
-      myWindow->RPort->AreaInfo = &areainfo;
+      if(areabuf = AllocMem(AREABUF_SIZE,MEMF_CLEAR))
+      {
+          InitArea(&areainfo,areabuf,MAXVEC);
+          myWindow->RPort->AreaInfo = &areainfo;
+      }
   }
 
   /* end of scratch space init XXX! add error checking */
@@ -561,6 +564,7 @@ void screen_background(padRGB* theColor)
  */
 void screen_paint(padPt* Coord)
 {
+  if(!config.paint_enabled) return;
   SetOPen(myWindow->RPort,current_foreground);
   Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]);
   BNDRYOFF(myWindow->RPort);
@@ -578,16 +582,18 @@ void screen_done(void)
   
   if (myWindow)
     /* deallocate tmpras and areainfo */
-    myWindow->RPort->TmpRas = 0L;
-    FreeMem(tmpbuf,(long)rassize);
-    myWindow->RPort->AreaInfo = 0L;
-    FreeMem(areabuf,(long)AREABUF_SIZE);
+      if(config.paint_enabled) {
+        myWindow->RPort->TmpRas = 0L;
+        FreeMem(tmpbuf,(long)rassize);
+        myWindow->RPort->AreaInfo = 0L;
+        FreeMem(areabuf,(long)AREABUF_SIZE);
+      }
     /* Now we can safely close the window */  
     CloseWindow(myWindow);
   if (myScreen)
     CloseScreen(myScreen);
   
-  if(lowmem_flag) /* we closed the workbench above, try to open it again */
+  if(lowmem_flag||config.close_workbench) /* we closed the workbench above, try to open it again */
       OpenWorkBench();
 
   if (IntuitionBase)
