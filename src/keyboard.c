@@ -180,6 +180,7 @@ void keyboard_main(void)
 	}
       else if (device_requester_is_active==1)
 	{
+	  // TODO: come back here and add code to focus unit gadget if enter pressed in device menu.
 	  if (intuition_msg->Class==GADGETUP && intuition_msg->IAddress == (APTR) &devicesRequesterGadget_apply)
 	    {
 	      requester_devices_done();

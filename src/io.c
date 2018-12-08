@@ -14,6 +14,7 @@
 #include <exec/ports.h>
 #include <devices/serial.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "io.h"
 #include "protocol.h"
@@ -32,15 +33,21 @@ extern void done(void);
 MySer* ms;
 struct Message* io_msg;
 
+static unsigned char device_is_opened=0;
+
 static UBYTE *alertSerialDeviceError =
   "\x00\x70\x14" "Could not open the selected serial device!" "\x00\x01"
   "\x00\x80\x24" "Press any Mouse Button to use defaults." "\x00";
+
+static UBYTE *alertTrigger =
+  "\x00\x70\x14" "Alert trigger!" "\x00";
 
 /**
  * io_init() - Set-up the I/O
  */
 void io_init(void)
 {
+ retry_io_open:
   ms = (MySer *) AllocMem(sizeof(MySer), MEMF_PUBLIC|MEMF_CLEAR);
   if (!ms)
     done();
@@ -49,7 +56,7 @@ void io_init(void)
   ms->writeport=CreatePort(NULL,0L);
   if (!ms->readport || !ms->writeport)
     done();
-
+  
   ms->readio  = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
   ms->writeio = (struct IOExtSer *)CreateExtIO(ms->writeport, sizeof(struct IOExtSer));
   if (!ms->readio || !ms->writeio)
@@ -57,13 +64,28 @@ void io_init(void)
   
   if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
     {
-      // failed, let's spit out an alert, and try the default device.
-      DisplayAlert(RECOVERY_ALERT,alertSerialDeviceError,52);
-      prefs_set_defaults();
-      if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
-	done();
+      // We couldn't open the device named in preferences.
+      if (strcmp(config.device_name,"serial.device")==0)
+	done(); // we couldn't open the default serial.device, exit the program.
+      else
+	{
+	  // serial device was changed from default, and it didn't open, display alert,
+	  // reset to default, and try to open the default.
+	  DisplayAlert(RECOVERY_ALERT,alertSerialDeviceError,52);
+	  prefs_set_defaults();
+
+	  // Clean up, and try again.
+	  DeleteExtIO((struct IORequest *)ms->writeio);
+	  DeleteExtIO((struct IORequest *)ms->readio);
+	  DeletePort(ms->writeport);
+	  DeletePort(ms->readport);
+	  
+	  goto retry_io_open;
+	}
     }
 
+  device_is_opened=1; // Device is now open.
+  
   /* Set parameters from prefs */
   ms->readio->io_RBufLen=config.io_RBufLen;
   ms->readio->io_Baud=config.io_Baud;
@@ -99,6 +121,14 @@ void io_init(void)
   SendIO((struct IORequest *)ms->readio);
   read_io_active=true;
 
+}
+
+/**
+ * io_create_ports(void)
+ * Create I/O ports and requests
+ */
+void io_create_ports(void)
+{
 }
 
 /**
@@ -196,19 +226,46 @@ void io_main(void)
  */
 void io_done(void)
 {
-  AbortIO((struct IORequest *)ms->writeio);
-  WaitIO((struct IORequest *)ms->writeio);
-  AbortIO((struct IORequest *)ms->readio);
-  WaitIO((struct IORequest *)ms->readio);
-
-  if (ms)
+  if (ms!=NULL)
     {
-      CloseDevice((struct IORequest *)ms->readio);
-      CloseDevice((struct IORequest *)ms->writeio);
-      DeleteExtIO((struct IORequest *)ms->writeio);
-      DeleteExtIO((struct IORequest *)ms->readio);
-      DeletePort(ms->writeport);
-      DeletePort(ms->readport);
+      // Abort any pending I/O transactions.
+      if (ms->writeio != NULL)
+	{
+	  AbortIO((struct IORequest *)ms->writeio);
+	  WaitIO((struct IORequest *)ms->writeio);
+	}
+      
+      if (ms->readio != NULL)
+	{
+	  AbortIO((struct IORequest *)ms->readio);
+	  WaitIO((struct IORequest *)ms->readio);
+	}
+
+      // Close device
+      if (device_is_opened==1)
+	{
+	  CloseDevice((struct IORequest *)ms->readio);
+	  CloseDevice((struct IORequest *)ms->writeio);
+	  device_is_opened=0;
+	}
+
+      // Delete the IO requests.
+      if (ms->writeio != NULL)
+	{
+	  DeleteExtIO((struct IORequest *)ms->writeio);
+	}
+      if (ms->readio != NULL)
+	{
+	  DeleteExtIO((struct IORequest *)ms->readio);
+	}
+
+      // Delete the ports
+      if (ms->writeport!=NULL)
+	DeletePort(ms->writeport);
+      if (ms->readport!=NULL)
+	DeletePort(ms->readport);
+
+      // Finally, free the serial I/O structure
       FreeMem(ms,sizeof(MySer));
     }
 }
