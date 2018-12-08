@@ -175,6 +175,42 @@ void keyboard_main(void)
 		{
 		  requester_devices_run();
 		}
+	      else if (menuNum==2&&itemNum==3&&subNum==31)
+		{
+		  io_set_baud(300);
+		}
+	      else if (menuNum==2&&itemNum==4&&subNum==31)
+		{
+		  io_set_baud(1200);
+		}
+	      else if (menuNum==2&&itemNum==5&&subNum==31)
+		{
+		  io_set_baud(2400);
+		}
+	      else if (menuNum==2&&itemNum==6&&subNum==31)
+		{
+		  io_set_baud(4800);
+		}
+	      else if (menuNum==2&&itemNum==7&&subNum==31)
+		{
+		  io_set_baud(9600);
+		}
+	      else if (menuNum==2&&itemNum==8&&subNum==31)
+		{
+		  io_set_baud(19200);
+		}
+	      else if (menuNum==2&&itemNum==9&&subNum==31)
+		{
+		  io_set_baud(38400);
+		}
+	      else if (menuNum==2&&itemNum==10&&subNum==31)
+		{
+		  io_set_baud(57600);
+		}
+	      else if (menuNum==2&&itemNum==11&&subNum==31)
+		{
+		  io_set_baud(115200);
+		}
 	      menuNumber = item->NextSelect;
 	    }
 	}

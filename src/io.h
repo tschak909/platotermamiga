@@ -56,4 +56,9 @@ void io_main(void);
  */
 void io_done(void);
 
+/**
+ * io_set_baud(baud_rate) - Set the serial device to given baud rate
+ */
+void io_set_baud(long baud_rate);
+
 #endif /* IO_H */

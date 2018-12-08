@@ -19,6 +19,7 @@
 #include "io.h"
 #include "protocol.h"
 #include "prefs.h"
+#include "screen.h"
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
@@ -268,4 +269,21 @@ void io_done(void)
       // Finally, free the serial I/O structure
       FreeMem(ms,sizeof(MySer));
     }
+}
+
+/**
+ * io_set_baud(baud_rate) - Set the serial device to given baud rate
+ */
+void io_set_baud(long baud_rate)
+{
+  if (ms->readio==NULL)
+    return;
+
+  config.io_Baud=baud_rate;
+  prefs_save();
+  
+  io_done();
+  io_init();
+  
+  screen_update_title();
 }

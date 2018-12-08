@@ -17,7 +17,7 @@
 #define LEFT_TEXT_ITEM             4
 #define TOP_TEXT_ITEM              2
 
-#define MUTUALEXCLUDE_BAUD_MENU   0x1FF    // Baud rate radio
+#define MUTUALEXCLUDE_BAUD_MENU   0xFF8    // Baud rate radio
 
 #define PEN_TEXT_BG    0
 #define PEN_TEXT_FG    1
