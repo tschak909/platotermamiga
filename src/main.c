@@ -51,6 +51,7 @@ void done(void)
   palette_debug_done();
   io_done();
   sound_done();
+  menu_done();
   screen_done();
   exit(0); /* TODO: add exit code? */
 }

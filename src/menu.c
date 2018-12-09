@@ -215,6 +215,12 @@ void menu_toggle_plato_mode(unsigned char toggle)
 }
 
 /* Add our menu to the menustrip */
-void menu_init() {
+void menu_init(void) {
   SetMenuStrip(myWindow,&menuTerminal);
+}
+
+/* Remove our menu when done */
+void menu_done(void)
+{
+  ClearMenuStrip(myWindow);
 }
