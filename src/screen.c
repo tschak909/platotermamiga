@@ -579,6 +579,7 @@ void screen_done(void)
   RemFont(&platoFont);
   RemFont(&platoBoldFont);
   RemFont(&platoUserFont);
+  RemFont(&platoBoldUserFont);
   
   if (myWindow)
     {
