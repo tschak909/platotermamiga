@@ -42,7 +42,7 @@ unsigned char key_to_pkey[]={
     PKEY_MULTIPLY, /* 0x18 CTRL-X */
     PKEY_SUB, /* 0x19 CTRL-Y */
     PKEY_NOKEY, /* 0x1a CTRL-Z */
-    PKEY_NOKEY, /* 0x1b ESC */
+    PKEY_ASSIGN, /* 0x1b ESC */
     PKEY_NOKEY, /* 0x1c */
     PKEY_NOKEY, /* 0x1d */
     PKEY_NOKEY, /* 0x1e */
@@ -178,7 +178,7 @@ unsigned char ctrl_shift_key_to_pkey[]={
     PKEY_NOKEY, /* 0x1d */
     PKEY_NOKEY, /* 0x1e */
     PKEY_NOKEY, /* 0x1f */
-    PKEY_NOKEY, /* 0x20 SPACE */
+    PKEY_BACKSPACE, /* 0x20 SPACE */
     PKEY_NOKEY, /* 0x21 ! */
     PKEY_NOKEY, /* 0x22 " */
     PKEY_NOKEY, /* 0x23 # */

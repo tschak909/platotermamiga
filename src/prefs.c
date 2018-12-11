@@ -32,7 +32,7 @@ void prefs_set_defaults(void)
   strcpy(config.device_name,"serial.device");
   config.unit_number=0;
   config.paint_enabled=1;
-  config.close_workbench=1;
+  config.close_workbench=0;
   config.rtscts_enabled=1;
   prefs_save();
 }

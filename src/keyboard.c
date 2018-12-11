@@ -91,6 +91,15 @@ void keyboard_main(void)
 	      Touch(&Coord);
 	    }
 	}
+      else if (intuition_msg->Class == RAWKEY)
+	{
+	  if (intuition_msg->Code==0x5F && intuition_msg->Qualifier & IEQUALIFIER_LSHIFT) // LSHIFT-Help key
+	    keyboard_out(PKEY_HELP1);
+	  else if (intuition_msg->Code==0x5F && intuition_msg->Qualifier & IEQUALIFIER_RSHIFT) // LSHIFT-Help key.
+	    keyboard_out(PKEY_HELP1);
+	  else if (intuition_msg->Code==0x5F)
+	    keyboard_out(PKEY_HELP);
+	}
       else if (intuition_msg->Class == VANILLAKEY)
 	{
 	  if (intuition_msg->Qualifier & IEQUALIFIER_RCOMMAND)
@@ -124,6 +133,25 @@ void keyboard_main(void)
 		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);
 	      else if (intuition_msg->Qualifier & IEQUALIFIER_RSHIFT)
 		keyboard_out(ctrl_shift_key_to_pkey[intuition_msg->Code]);
+	      else if ((intuition_msg->Qualifier & IEQUALIFIER_LALT) ||
+		       (intuition_msg->Qualifier & IEQUALIFIER_RALT))
+		{
+		  if (intuition_msg->Qualifier & IEQUALIFIER_LSHIFT)
+		    {
+		      keyboard_out(PKEY_ACCESS);
+		      keyboard_out(key_to_pkey[intuition_msg->Code]);
+		    }
+		  else if (intuition_msg->Qualifier & IEQUALIFIER_RSHIFT)
+		    {
+		      keyboard_out(PKEY_ACCESS);
+		      keyboard_out(key_to_pkey[intuition_msg->Code]);
+		    }
+		  else
+		    {
+		      keyboard_out(PKEY_MICRO);
+		      keyboard_out(key_to_pkey[intuition_msg->Code]);
+		    }
+		}
 	      else
 		keyboard_out(key_to_pkey[intuition_msg->Code]);
 	    }
