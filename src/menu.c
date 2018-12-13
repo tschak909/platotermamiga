@@ -214,6 +214,43 @@ void menu_toggle_plato_mode(unsigned char toggle)
   ResetMenuStrip(myWindow,&menuTerminal);
 }
 
+/**
+ * Set baud rate in menu
+ `*/
+void menu_update_baud_rate(long baud_rate)
+{
+  ClearMenuStrip(myWindow);
+  item300.Flags=item1200.Flags=item2400.Flags=item9600.Flags=item19200.Flags=item38400.Flags=item57600.Flags=item115200.Flags=CHECKIT|ITEMTEXT|ITEMENABLED|HIGHCOMP;
+  switch (baud_rate)
+    {
+    case 300:
+      item300.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    case 1200:
+      item1200.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;      
+    case 2400:
+      item2400.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    case 9600:
+      item9600.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    case 19200:
+      item9600.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    case 38400:
+      item38400.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    case 57600:
+      item57600.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    case 115200:
+      item115200.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
+      break;
+    }
+  ResetMenuStrip(myWindow,&menuTerminal);
+}
+
 /* Add our menu to the menustrip */
 void menu_init(void) {
   SetMenuStrip(myWindow,&menuTerminal);
