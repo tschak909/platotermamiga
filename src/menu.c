@@ -203,15 +203,15 @@ struct Menu menuTerminal =
  */
 void menu_toggle_plato_mode(unsigned char toggle)
 {
-  /* if (!myWindow) */
-  /*   return; */
+  if (!myWindow)
+    return;
 
-  /* ClearMenuStrip(myWindow); */
-  /* if (toggle==1) */
-  /*   itemPLATOMode.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT|CHECKED; */
-  /* else */
-  /*   itemPLATOMode.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT; */
-  /* ResetMenuStrip(myWindow,&menuTerminal); */
+  ClearMenuStrip(myWindow);
+  if (toggle==1)
+    itemPLATOMode.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT|CHECKED;
+  else
+    itemPLATOMode.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT;
+  ResetMenuStrip(myWindow,&menuTerminal);
 }
 
 /* Add our menu to the menustrip */
