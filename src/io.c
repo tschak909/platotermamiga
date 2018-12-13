@@ -20,6 +20,7 @@
 #include "protocol.h"
 #include "prefs.h"
 #include "screen.h"
+#include "menu.h"
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
@@ -47,11 +48,12 @@ static UBYTE *alertTrigger =
  */
 void io_init(void)
 {
- retry_io_open:
+
   ms = (MySer *) AllocMem(sizeof(MySer), MEMF_PUBLIC|MEMF_CLEAR);
   if (!ms)
     done();
 
+ retry_io_open:  
   ms->readport=CreatePort(NULL,0L);
   ms->writeport=CreatePort(NULL,0L);
   if (!ms->readport || !ms->writeport)
@@ -79,7 +81,6 @@ void io_init(void)
 	  DeleteExtIO((struct IORequest *)ms->readio);
 	  DeletePort(ms->writeport);
 	  DeletePort(ms->readport);
-	  
 	  goto retry_io_open;
 	}
     }
@@ -109,6 +110,8 @@ void io_init(void)
   ms->readio->IOSer.io_Command = SDCMD_SETPARAMS;
   if (DoIO((struct IORequest *)ms->readio))
     done();
+
+  menu_update_baud_rate(config.io_Baud);
   
   /* Serial port should be initialized, and open, at this point. */
   /* TBD: do baud rate setting */
@@ -120,7 +123,6 @@ void io_init(void)
   ms->readio->IOSer.io_Data = (APTR) ms->readdata;
   SendIO((struct IORequest *)ms->readio);
   read_io_active=true;
-
 }
 
 /**
@@ -283,7 +285,8 @@ void io_set_baud(long baud_rate)
   
   io_done();
   io_init();
-  
+
+  menu_update_baud_rate(baud_rate);
   screen_update_title();
 }
 
@@ -292,7 +295,6 @@ void io_set_baud(long baud_rate)
  */
 void io_toggle_rtscts(void)
 {
-  DisplayBeep(NULL);
   config.rtscts_enabled^=1;
   prefs_save();
 
