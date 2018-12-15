@@ -233,14 +233,26 @@ void io_done(void)
       // Abort any pending I/O transactions.
       if (ms->writeio != NULL)
 	{
-	  AbortIO((struct IORequest *)ms->writeio);
-	  WaitIO((struct IORequest *)ms->writeio);
+      /* We don't want to chance a hang on WaitIO so only
+       * AbortIO if we have to 
+       */
+      if(!(CheckIO((struct IORequest *)ms->writeio)))
+      {
+          AbortIO((struct IORequest *)ms->writeio);
+          WaitIO((struct IORequest *)ms->writeio);
+      }
 	}
       
       if (ms->readio != NULL)
 	{
-	  AbortIO((struct IORequest *)ms->readio);
-	  WaitIO((struct IORequest *)ms->readio);
+      /* We don't want to chance a hang on WaitIO so only
+       * AbortIO if we have to 
+       */
+      if(!(CheckIO((struct IORequest *)ms->readio)))
+      {
+          AbortIO((struct IORequest *)ms->readio);
+          WaitIO((struct IORequest *)ms->readio);
+      }
 	}
 
       // Close device

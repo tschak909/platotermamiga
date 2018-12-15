@@ -211,7 +211,7 @@ void menu_toggle_plato_mode(unsigned char toggle)
     itemPLATOMode.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT|CHECKED;
   else
     itemPLATOMode.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ|MENUTOGGLE|CHECKIT;
-  ResetMenuStrip(myWindow,&menuTerminal);
+  SetMenuStrip(myWindow,&menuTerminal);
 }
 
 /**
@@ -248,7 +248,7 @@ void menu_update_baud_rate(long baud_rate)
       item115200.Flags=ITEMTEXT|ITEMENABLED|HIGHCOMP|CHECKIT|CHECKED;
       break;
     }
-  ResetMenuStrip(myWindow,&menuTerminal);
+  SetMenuStrip(myWindow,&menuTerminal);
 }
 
 /* Add our menu to the menustrip */
