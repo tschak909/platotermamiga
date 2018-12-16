@@ -233,6 +233,11 @@ void io_done(void)
       // Abort any pending I/O transactions.
       if (ms->writeio != NULL)
 	{
+      /* Don't wait on a write that may never complete.
+       * Flush it!
+       */
+      ms->writeio->IOSer.io_Command = CMD_FLUSH; 
+      DoIO((struct IORequest *)ms->writeio);
       /* We don't want to chance a hang on WaitIO so only
        * AbortIO if we have to 
        */
