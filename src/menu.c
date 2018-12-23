@@ -37,7 +37,7 @@ static struct IntuiText textsep3 =
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "-----------", NULL };
 
 static struct MenuItem itemsep3 =
-  { &itemRTSCTS, 0, 144, WIDTH_BAUD_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED, 0, &textsep3, &textsep3, NULL,    NULL, 0 };
+  { &itemRTSCTS, 0, 144, WIDTH_BAUD_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT, 0, &textsep3, &textsep3, NULL,    NULL, 0 };
 
 static struct IntuiText text115200 = 
   { 0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "115200", NULL };
@@ -103,7 +103,7 @@ static struct IntuiText textsep2 =
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "-----------", NULL };
 
 static struct MenuItem itemsep2 =
-  { &itemBaudGroup, 0, 12, WIDTH_BAUD_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED, 0, &textsep2, &textsep2, NULL,    NULL, 0 };
+  { &itemBaudGroup, 0, 12, WIDTH_BAUD_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT, 0, &textsep2, &textsep2, NULL,    NULL, 0 };
 
 static struct IntuiText textDevice =
   {0, 1, JAM2, 0, TOP_TEXT_ITEM, NULL, "Device...", NULL};
@@ -143,7 +143,7 @@ static struct IntuiText textQuit =
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "Quit", NULL };
 
 static struct MenuItem itemQuit =
-  { NULL, 0, 36, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textQuit, &textQuit, 'X',    NULL, 0 };
+  { NULL, 0, 36, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textQuit, &textQuit, 'Q',    NULL, 0 };
 
 
 static struct IntuiText textAbout = 
@@ -156,7 +156,7 @@ static struct IntuiText textsep1 =
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "-----------------", NULL };
 
 static struct MenuItem itemsep1 =
-  { &itemAbout, 0, 12, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED, 0, &textsep1, &textsep1, NULL,    NULL, 0 };
+  { &itemAbout, 0, 12, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT, 0, &textsep1, &textsep1, NULL,    NULL, 0 };
 
 static struct IntuiText textPLATOMode =
   {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "PLATO Mode", NULL};
