@@ -21,6 +21,7 @@
 #include "touch.h"
 #include "palette_debug.h"
 #include "requester_devices.h"
+#include "requester_hang_up.h"
 #include "prefs.h"
 
 struct IntuiMessage* intuition_msg;
@@ -117,6 +118,10 @@ void keyboard_main(void)
 		  palette_debug_show();
 		  palette_debug_update();
 		}
+	      else if (intuition_msg->Code=='h')
+		{
+		  requester_hang_up_do();
+		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
@@ -175,13 +180,17 @@ void keyboard_main(void)
           while(menuNumber != MENUNULL)
 	    {
 	      item = ItemAddress(&menuTerminal,menuNumber); 
-	      if(menuNum == 0 && itemNum == 3 && subNum == 31)
+	      if(menuNum == 0 && itemNum == 4 && subNum == 31)
 		{
 		  done();
 		}
-	      else if (menuNum==0&&itemNum==2&&subNum==31)
+	      else if (menuNum==0&&itemNum==3&&subNum==31)
 		{
 		  screen_about();
+		}
+	      else if (menuNum==0&&itemNum==1&&subNum==31)
+		{
+		  requester_hang_up_do();
 		}
 	      else if (menuNum==0&&itemNum==0&&subNum==31)
 		{
