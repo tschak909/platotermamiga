@@ -46,8 +46,7 @@ dist: clean build/PLATOTerm
 	xdftool dist/1.x/PLATOTerm.adf write "dist/docs/Read Me" /
 	cp dist/2.x/files/template.adf dist/2.x/PLATOTerm.adf
 	cp build/PLATOTerm dist/2.x/PLATOTerm
-	cp dist/1.x/files/PLATOTerm.info dist/2.x/PLATOTerm.info
-	cp icons/2.x/PLATOTermPrefs.info dist/2.x/PLATOTermPrefs.info
+	cp icons/NewIcon/PLATOTerm.info dist/2.x/PLATOTerm.info
 	xdftool dist/2.x/PLATOTerm.adf write build/PLATOTerm /
 	xdftool dist/2.x/PLATOTerm.adf write "dist/docs/Read Me" /
 
