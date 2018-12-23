@@ -260,11 +260,17 @@ void io_done(void)
       }
 	}
 
+      /**
+       * Reset serial port to default values
+       */
+      ms->readio->IOSer.io_Command=CMD_RESET;
+      ms->readio->IOSer.io_Flags = 0;
+      SendIO((struct IORequest *)ms->readio);
+      
       // Close device
       if (device_is_opened==1)
 	{
 	  CloseDevice((struct IORequest *)ms->readio);
-	  CloseDevice((struct IORequest *)ms->writeio);
 	  device_is_opened=0;
 	}
 
