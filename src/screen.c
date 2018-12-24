@@ -30,6 +30,7 @@
 #include "font.h"
 #include "palette_debug.h"
 #include "prefs.h"
+#include "clipboard.h"
 
 #ifdef __VBCC__
 #undef NULL
@@ -337,6 +338,7 @@ void screen_clear(void)
   screen_update_colors();
   SetRast(myWindow->RPort,current_background);
   SetAPen(myWindow->RPort,current_foreground);
+  clipboard_clear();
 }
 
 /**
@@ -456,6 +458,7 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
   
   Move(myWindow->RPort,x,y);
   Text(myWindow->RPort,ch,count);
+  clipboard_update_buffer(Coord,ch,count);
 
 }
 

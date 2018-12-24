@@ -23,6 +23,7 @@
 #include "requester_devices.h"
 #include "requester_hang_up.h"
 #include "prefs.h"
+#include "clipboard.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
@@ -122,6 +123,10 @@ void keyboard_main(void)
 		{
 		  requester_hang_up_do();
 		}
+	      else if (intuition_msg->Code=='c')
+		{
+		  clipboard_write();
+		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
@@ -198,6 +203,10 @@ void keyboard_main(void)
 		    InitPLATO();
 		  else
 		    InitTTY();
+		}
+	      else if (menuNum==1&&itemNum==0&&subNum==31)
+		{
+		  clipboard_write();
 		}
 	      else if (menuNum==3&&itemNum==0&&subNum==31)
 		{

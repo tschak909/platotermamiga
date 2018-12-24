@@ -12,6 +12,7 @@
 #include "help.h"
 #include "palette_debug.h"
 #include "prefs.h"
+#include "clipboard.h"
 
 #define true 1
 #define false 0
@@ -25,6 +26,7 @@ extern struct Window* myWindow;
 int main(void)
 {
   prefs_load();
+  clipboard_init();
   screen_init();
   menu_init();
   io_init();
@@ -47,6 +49,7 @@ int main(void)
  */
 void done(void)
 {
+  clipboard_done();
   help_done();
   palette_debug_done();
   io_done();
