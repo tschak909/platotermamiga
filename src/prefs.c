@@ -44,7 +44,11 @@ void prefs_load(void)
 {
   fileHandle=Open(PREFS_FILE,MODE_OLDFILE);
   if (fileHandle==0)
+  {
+    fileHandle=Open(PREFS_FILE,MODE_NEWFILE);
+    Close(fileHandle);
     prefs_set_defaults();
+  }
   else
     {
       Read(fileHandle,&config,sizeof(config));
