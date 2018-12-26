@@ -127,6 +127,10 @@ void keyboard_main(void)
 		{
 		  clipboard_write();
 		}
+	      else if (intuition_msg->Code=='a')
+		{
+		  clipboard_write_screen();
+		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
@@ -207,6 +211,10 @@ void keyboard_main(void)
 	      else if (menuNum==1&&itemNum==0&&subNum==31)
 		{
 		  clipboard_write();
+		}
+	      else if (menuNum==1&&itemNum==2&&subNum==31)
+		{
+		  clipboard_write_screen();
 		}
 	      else if (menuNum==3&&itemNum==0&&subNum==31)
 		{

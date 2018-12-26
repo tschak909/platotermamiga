@@ -48,6 +48,11 @@ void clipboard_write_long(long* data);
 void clipboard_write(void);
 
 /**
+ * Write screen to clipboard
+ */
+void clipboard_write_screen(void);
+
+/**
  * Tear down the clipboard
  */
 void clipboard_done(void);
