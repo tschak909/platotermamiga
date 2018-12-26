@@ -1,39 +1,41 @@
-PLATOTerm 0.2 Smoke Test for Amiga Users
-========================================
+PLATOTerm 0.3 Alpha Release for Amiga Users
+===========================================
 
-This version is for users with WIFI modems connected to their RS-232
-serial port. It uses the default serial.device, for now.
-
-Changes since 0.1
+Changes since 0.2
 -----------------
 
-There is a new Amiga splash screen, in this version.
-
-The font requirement in the previous release has been removed, as
-the required font data is now embedded within the program. Also,
-as a result, the installer script is no longer needed, and has
-been removed from the 2.x version of the disk.
-
-Note: This is a test release, intended to test whether PLATOTerm works
-outside of emulation. The program is still being developed, and many
-user interface features are missing. If you can help with finishing
-development, please fork the repository on GitHub. Otherwise, please
-test, and let us know in the Issues if the terminal adversely does not
-at the very least:
+* Write text or screen graphics to clipboard.
+* Various small I/O related bugs have been squashed.
+* Baud Rate now selectable.
+* Serial Device File now selectable.
+* R-AMIGA H to Hang up.
 
 Please test
 -----------
 
-* Set your baud rate in Serial Preferences (be sure to set RTS/CTS if
-you can use it!)
-* Set your serial buffer size large enough (e.g. 4000 bytes)
 * Start up
+* Set Baud rate and Serial.device via the menu.
 * Communicate with your modem (AT OK)
 * Connect to IRATA.ONLINE
 * Reliably transfer data at the chosen baud rate and buffer settings.
+* Ensure you can hang up by pressing R-AMIGA-H or by selecting menu item
+* Select Copy Text, paste in a supported program (e.g. Redit)
+* Select Copy Screen, paste in supported program (e.g. Deluxe Paint IV)
 * Properly exit the program.
 * Ensure that the Keys and Palette windows in Help work correctly.
 
+New Keys
+--------
+
+The following keys have been added:
+
+-----------------------------
+| Amiga key | Function      |
+-----------------------------
+| R-AMIGA H | (Hang Up)     |
+| R-AMIGA C | (Copy Text)   |
+| R-AMIGA A | (Copy Screen) |
+-----------------------------
 
 Loading PLATOTerm
 -----------------
