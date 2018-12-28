@@ -143,27 +143,32 @@ static struct IntuiText textQuit =
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "Quit", NULL };
 
 static struct MenuItem itemQuit =
-  { NULL, 0, 48, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textQuit, &textQuit, 'Q',    NULL, 0 };
+  { NULL, 0, 60, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textQuit, &textQuit, 'Q',    NULL, 0 };
 
 
 static struct IntuiText textAbout = 
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "About...", NULL };
 
 static struct MenuItem itemAbout =
-  { &itemQuit, 0, 36, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP, 0, &textAbout, &textAbout, NULL,    NULL, 0 };
+  { &itemQuit, 0, 48, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP, 0, &textAbout, &textAbout, NULL,    NULL, 0 };
 
 static struct IntuiText textsep1 = 
   { 0, 1, JAM2, LEFT_TEXT_ITEM, TOP_TEXT_ITEM, NULL, "-----------------", NULL };
 
 static struct MenuItem itemsep1 =
-  { &itemAbout, 0, 24, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT, 0, &textsep1, &textsep1, NULL,    NULL, 0 };
+  { &itemAbout, 0, 36, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT, 0, &textsep1, &textsep1, NULL,    NULL, 0 };
 
+static struct IntuiText textPrint =
+  {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "Print...", NULL};
+
+static struct MenuItem itemPrint =
+  { &itemsep1, 0, 24, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textPrint, &textPrint, 'P',    NULL, 0 };
 
 static struct IntuiText textHangUp =
   {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "Hang Up", NULL};
 
 static struct MenuItem itemHangUp =
-  { &itemsep1, 0, 12, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textHangUp, &textHangUp, 'H',    NULL, 0 };
+  { &itemPrint, 0, 12, WIDTH_TERMINAL_MENU_ITEM, HEIGHT_ITEM, ITEMTEXT|ITEMENABLED|HIGHCOMP|COMMSEQ, 0, &textHangUp, &textHangUp, 'H',    NULL, 0 };
 
 static struct IntuiText textPLATOMode =
   {0, 1, JAM2, CHECKWIDTH, TOP_TEXT_ITEM, NULL, "PLATO Mode", NULL};

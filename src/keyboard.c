@@ -131,6 +131,11 @@ void keyboard_main(void)
 		{
 		  clipboard_write_screen();
 		}
+	      else if (intuition_msg->Code=='p')
+		{
+		  // TODO: add call to requester_print();
+		  DisplayBeep(NULL);
+		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
@@ -189,13 +194,18 @@ void keyboard_main(void)
           while(menuNumber != MENUNULL)
 	    {
 	      item = ItemAddress(&menuTerminal,menuNumber); 
-	      if(menuNum == 0 && itemNum == 4 && subNum == 31)
+	      if(menuNum == 0 && itemNum == 5 && subNum == 31)
 		{
 		  done();
 		}
-	      else if (menuNum==0&&itemNum==3&&subNum==31)
+	      else if (menuNum==0&&itemNum==4&&subNum==31)
 		{
 		  screen_about();
+		}
+	      else if (menuNum==0&&itemNum==2&&subNum==31)
+		{
+		  // Add call to print requester
+		  DisplayBeep(NULL);
 		}
 	      else if (menuNum==0&&itemNum==1&&subNum==31)
 		{
