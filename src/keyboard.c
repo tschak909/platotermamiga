@@ -22,6 +22,7 @@
 #include "palette_debug.h"
 #include "requester_devices.h"
 #include "requester_hang_up.h"
+#include "requester_print.h"
 #include "prefs.h"
 #include "clipboard.h"
 
@@ -133,8 +134,7 @@ void keyboard_main(void)
 		}
 	      else if (intuition_msg->Code=='p')
 		{
-		  // TODO: add call to requester_print();
-		  DisplayBeep(NULL);
+		  requester_print_do();
 		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
@@ -205,7 +205,7 @@ void keyboard_main(void)
 	      else if (menuNum==0&&itemNum==2&&subNum==31)
 		{
 		  // Add call to print requester
-		  DisplayBeep(NULL);
+		  requester_print_do();
 		}
 	      else if (menuNum==0&&itemNum==1&&subNum==31)
 		{
