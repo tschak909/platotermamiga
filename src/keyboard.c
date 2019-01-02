@@ -21,7 +21,10 @@
 #include "touch.h"
 #include "palette_debug.h"
 #include "requester_devices.h"
+#include "requester_hang_up.h"
+#include "requester_print.h"
 #include "prefs.h"
+#include "clipboard.h"
 
 struct IntuiMessage* intuition_msg;
 extern struct Window *myWindow;
@@ -117,6 +120,22 @@ void keyboard_main(void)
 		  palette_debug_show();
 		  palette_debug_update();
 		}
+	      else if (intuition_msg->Code=='h')
+		{
+		  requester_hang_up_do();
+		}
+	      else if (intuition_msg->Code=='c')
+		{
+		  clipboard_write();
+		}
+	      else if (intuition_msg->Code=='a')
+		{
+		  clipboard_write_screen();
+		}
+	      else if (intuition_msg->Code=='p')
+		{
+		  requester_print_do();
+		}
 	    }
 	  else if (intuition_msg->Code == 0x0D) // Special case for SHIFT-NEXT
 	    {
@@ -175,13 +194,22 @@ void keyboard_main(void)
           while(menuNumber != MENUNULL)
 	    {
 	      item = ItemAddress(&menuTerminal,menuNumber); 
-	      if(menuNum == 0 && itemNum == 3 && subNum == 31)
+	      if(menuNum == 0 && itemNum == 5 && subNum == 31)
 		{
 		  done();
 		}
-	      else if (menuNum==0&&itemNum==2&&subNum==31)
+	      else if (menuNum==0&&itemNum==4&&subNum==31)
 		{
 		  screen_about();
+		}
+	      else if (menuNum==0&&itemNum==2&&subNum==31)
+		{
+		  // Add call to print requester
+		  requester_print_do();
+		}
+	      else if (menuNum==0&&itemNum==1&&subNum==31)
+		{
+		  requester_hang_up_do();
 		}
 	      else if (menuNum==0&&itemNum==0&&subNum==31)
 		{
@@ -189,6 +217,14 @@ void keyboard_main(void)
 		    InitPLATO();
 		  else
 		    InitTTY();
+		}
+	      else if (menuNum==1&&itemNum==0&&subNum==31)
+		{
+		  clipboard_write();
+		}
+	      else if (menuNum==1&&itemNum==2&&subNum==31)
+		{
+		  clipboard_write_screen();
 		}
 	      else if (menuNum==3&&itemNum==0&&subNum==31)
 		{
