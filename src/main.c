@@ -17,6 +17,7 @@
 #define true 1
 #define false 0
 
+char version[]="$VER: PLATOTerm 0.3 ("__DATE__")";
 unsigned char already_started=false;
 unsigned long sigbits;
 
