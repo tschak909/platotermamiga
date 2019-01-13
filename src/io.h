@@ -15,8 +15,8 @@
 
 typedef struct _MySer
 {
-  int state; /* we track what is allocated or not in here */
-  int error; /* error, check state */
+  UBYTE state; /* we track what is allocated or not in here */
+  UBYTE error; /* error, check state */
   char name[40]; /*device name string */ 
   unsigned long unit_number; /* unit number for OpenDevice */
   struct MsgPort *writeport;  /** when the writeio is done, reply goes here **/
