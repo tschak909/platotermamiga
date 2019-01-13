@@ -21,8 +21,9 @@
 #include "protocol.h"
 #include "prefs.h"
 #include "screen.h"
+#include "keyboard.h"
 #include "menu.h"
-
+#include "requester_devices.h"
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 #define true 1
@@ -51,66 +52,51 @@ static UBYTE *alertTrigger =
 int io_ctl(MySer *dev, int op) {
 
     if(op == IO_OPEN) {
-        dprintf("IO_OPEN entered\n");
         if(dev->state != 0x0) { /* Open only makes sense with an empty state */
-            dprintf("state is not clean for IO_OPEN\n");
             dev->error = 1; 
             return 1;
         }
         dev->readport = CreatePort(NULL,0L);
         if(dev->readport) {
             dev->state |= RP_OPEN;
-            dprintf("set RP_OPEN\n");
         }
         dev->writeport = CreatePort(NULL,0L);
         if(dev->writeport) {
             dev->state |= WP_OPEN;
-            dprintf("set WP_OPEN\n");
-            dprintf("dev->state = %x\n",dev->state);
         }
         dev->readio = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
         if(dev->readio) {
             dev->state |= RIO_OPEN;
-            dprintf("set RIO_OPEN\n");
         }
         dev->writeio = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
         if(dev->writeio) {
             dev->state |= WIO_OPEN;
-            dprintf("set WIO_OPEN\n");
         }
 
         if(dev->state == (RP_OPEN | WP_OPEN | RIO_OPEN | WIO_OPEN)) {
             if(OpenDevice(dev->name,dev->unit_number,(struct IORequest * )dev->readio,0L)){
-                /* we can't open the named device, pop up the requestor */
-                /*XXX! not implemented yet */
-                dprintf("couldn't open %s unit %ld\n",dev->name,dev->unit_number);
                 dev->error = 1;
                 return 1;
             } else { 
                 dev->state |= DEV_OPEN;
-                dprintf("set DEV_OPEN\n");
             }
         }
         /* Assert that everything was set open */
         if(dev->state == (RP_OPEN | WP_OPEN | RIO_OPEN | WIO_OPEN | DEV_OPEN)) {
-            dprintf("IO_OPEN reached the happy path\n");
             return 0;
         }
-        dprintf("we should not reach here!\n");
+        /* we should not reach here */
         dev->error = 1;
         return 1;
     }
     
     /* Attempt to close each open resource in order */
     if(op == IO_CLOSE) {
-        dprintf("entered IO_CLOSE state = %d\n",dev->state);
         if(dev->state == 0x0) {
-            dprintf("Nothing to do!\n");
             return 0;
         }
         /* do flush IO/reset dance if it looks like everything is open */
         if(dev->state == (WP_OPEN|RP_OPEN|RIO_OPEN|WIO_OPEN|DEV_OPEN)) {
-            dprintf("IO_CLOSE detected that everything was open in state attempting IO cleanups\n");
             dev->writeio->IOSer.io_Command = CMD_FLUSH;  /*flush all pending writes */
             DoIO((struct IORequest *)dev->writeio);
             if(!CheckIO((struct IORequest *)dev->writeio)) { /* check and abort them anyway if needed */
@@ -127,33 +113,27 @@ int io_ctl(MySer *dev, int op) {
         }
         /* otherwise we check the state in order and close whatever has it's bit set */
         if(dev->state & DEV_OPEN) {
-            dprintf("DEV_OPEN attempting to close the device\n");
             CloseDevice((struct IORequest *)dev->readio);
             dev->state &= ~(DEV_OPEN);
         }
         if(dev->state & WIO_OPEN) {
-            dprintf("DeleteExtIO dev->writeio\n");
             DeleteExtIO((struct IORequest *)dev->writeio);
             dev->state &= ~(WIO_OPEN);
         }
         if(dev->state & RIO_OPEN) {
-            dprintf("DeleteExtIO dev->readio\n");
             DeleteExtIO((struct IORequest *)dev->readio);
             dev->state &= ~(RIO_OPEN);
         }
         if(dev->state & WP_OPEN) {
-            dprintf("DeletePort dev->writeport\n");
             DeletePort(dev->writeport);
             dev->state &= ~(WP_OPEN);
         }
         if(dev->state & RP_OPEN) {
-            dprintf("DeletePort dev->readport\n");
             DeletePort(dev->readport);
             dev->state &= ~(RP_OPEN);
         }
         /* assert that state is now 0 */
         if(dev->state != 0x0) {
-            dprintf("state is not clean after we finished IO_CLOSE something is very wrong!\n");
             dev->error = 1;
             return 1;
         }
@@ -166,7 +146,6 @@ int io_ctl(MySer *dev, int op) {
  */
 void io_init(void)
 {
-    dprintf("io_init entry\n");
 
   ms = (MySer *) AllocMem(sizeof(MySer), MEMF_PUBLIC|MEMF_CLEAR);
   if (!ms)
@@ -180,9 +159,17 @@ void io_init(void)
       // We couldn't open the device named in preferences.
       if (strcmp(ms->name,"serial.device")==0)
       {
-          //XXX! bring up the requestor instead
-          dprintf("aborting because serial.device does not exist! FIXME!\n");
-          done(); // we couldn't open the default serial.device, exit the program.
+          //can't open even serial.device so pop up the requester.
+          extern struct Window *myWindow;
+          extern unsigned char device_requester_is_active;
+          io_ctl(ms,IO_CLOSE);
+          requester_devices_run();
+          for(;;) { /* this duplicates the mainloop but blocks io_init until the requester finishes */
+              Wait(1L << myWindow->UserPort->mp_SigBit);   
+              keyboard_main();
+              if(device_requester_is_active == 0)
+                  return;
+          }
       }
       else
 	{
