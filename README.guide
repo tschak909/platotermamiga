@@ -1,3 +1,8 @@
+@database "README.guide"
+@author "ReadMe2Guide 0.7"
+@node Main "Main"
+@toc Contents
+@$VER: README.guide 0.1 (17.01.19) $
 PLATOTerm 0.1 Smoke Test for Amiga Users
 ========================================
 
@@ -13,6 +18,9 @@ development, please fork the repository on GitHub. Otherwise, please
 test, and let us know in the Issues if the terminal adversely does not
 at the very least:
 
+@endnode
+@node Pleasetest "Please test"
+@toc Contents
 Please test
 -----------
 
@@ -24,6 +32,9 @@ you can use it!)
 * Reliably transfer data at the chosen baud rate and buffer settings.
 * Properly exit the program.
 
+@endnode
+@node ANoteaboutPLATO.FONTandPLATOUser.fontforWorkBench2.x+users "A Note about PLATO.FONT and PLATOUser.font for WorkBench 2.x+ users"
+@toc Contents
 A Note about PLATO.FONT and PLATOUser.font for WorkBench 2.x+ users
 -------------------------------------------------------------------
 
@@ -41,6 +52,9 @@ I am actually looking into embedding the fonts, so that I can skip the
 install altogether, and the program can either be used from its
 distribution medium, or copied by dragging to a desired destination.
 
+@endnode
+@node LoadingPLATOTerm "Loading PLATOTerm"
+@toc Contents
 Loading PLATOTerm
 -----------------
 Once installed, PLATOTerm can be accessed simply by clicking on its
@@ -48,6 +62,9 @@ icon. The icon is a drawing of a Magnavox PLATO IV terminal, from 1974,
 and is widely regarded as the iconic PLATO terminal. If you have a
 better icon, please contribute!
 
+@endnode
+@node UsingPLATOTerm "Using PLATOTerm"
+@toc Contents
 Using PLATOTerm
 ---------------
 PLATOTerm will then display a splash screen, indicating that it is
@@ -67,6 +84,9 @@ For this initial testing release, the baud rate is set to 960BPS, if
 this baud rate proves too problematic, please set a new baud rate in
 Preferences.
 
+@endnode
+@node PLATOKeyboard "PLATO Keyboard"
+@toc Contents
 PLATO Keyboard
 --------------
 The PLATO keyboard is mapped to the Amiga keys, in this manner:
@@ -99,9 +119,21 @@ The PLATO keyboard is mapped to the Amiga keys, in this manner:
 | SUB | CTRL-Y |
 | SHIFT-SUB | SHIFT CTRL-Y |
 
+@endnode
+@node Problems? "Problems?"
+@toc Contents
 Problems?
 ---------
 This is early test software. If you have problems, please raise an
 issue, and I will address them and cut a new release. I am releasing
 this early and often so that everyone can test, and we can in the end,
 end up with a better piece of software, faster.
+@endnode
+@node Contents
+@{"Please test" link Pleasetest}
+@{"A Note about PLATO.FONT and PLATOUser.font for WorkBench 2.x+ users" link ANoteaboutPLATO.FONTandPLATOUser.fontforWorkBench2.x+users}
+@{"Loading PLATOTerm" link LoadingPLATOTerm}
+@{"Using PLATOTerm" link UsingPLATOTerm}
+@{"PLATO Keyboard" link PLATOKeyboard}
+@{"Problems?" link Problems?}
+@endnode
