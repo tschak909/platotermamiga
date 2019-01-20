@@ -30,8 +30,8 @@ int main(void)
   clipboard_init();
   screen_init();
   menu_init();
-  io_init();
   sound_init();
+  io_init();
   touch_init();
   terminal_init();
   ShowPLATO(splash,sizeof(splash));

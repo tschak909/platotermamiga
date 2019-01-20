@@ -7,22 +7,36 @@ SRC_DIRS := ./src
 CC = vc
 
 SRCS := $(shell find $(SRC_DIRS) -name *.c)
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+OBJS1x := $(SRCS:%=$(BUILD_DIR)/1x/%.o)
+DEPS1x := $(OBJS1x:.o=.d)
+
+OBJS2x := $(SRCS:%=$(BUILD_DIR)/2x/%.o)
+DEPS2x := $(OBJS2x:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := -I$(NDK_INC) $(addprefix -I,$(INC_DIRS))
 
-CPPFLAGS ?= +kick13 -c99 $(INC_FLAGS) 
-LDFLAGS := -lamiga -lauto -lm13 
+CPPFLAGS1x ?= +kick13 -c99 $(INC_FLAGS) 
+LDFLAGS1x := -lamiga -lauto -lm13 
 
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(CPPFLAGS) $(OBJS) -o $@ $(LDFLAGS)
+CPPFLAGS2x ?= +aos68k -c99 $(INC_FLAGS) 
+LDFLAGS2x := -lamiga -lauto -lmsoft
+
+all: $(BUILD_DIR)/1x/PLATOTerm $(BUILD_DIR)/2x/PLATOTerm
+$(BUILD_DIR)/1x/PLATOTerm: $(OBJS1x)
+	$(CC) $(CPPFLAGS1x) $(OBJS1x) -o $@ $(LDFLAGS1x)
+
+$(BUILD_DIR)/2x/PLATOTerm: $(OBJS2x)
+	$(CC) $(CPPFLAGS2x) $(OBJS2x) -o $@ $(LDFLAGS2x)
 
 # c source
-$(BUILD_DIR)/%.c.o: %.c
+$(BUILD_DIR)/1x/%.c.o: %.c
 	$(MKDIR_P) $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS1x) $(CFLAGS1x) -c $< -o $@
+
+$(BUILD_DIR)/2x/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS2x) $(CFLAGS2x) -c $< -o $@
 
 .PHONY: clean
 
@@ -36,18 +50,18 @@ clean:
 	rm -rf dist/2.x/PLATOTerm.info
 	rm -rf dist/2.x/PLATOTerm.adf
 
-dist: clean build/PLATOTerm
+dist: clean build/1x/PLATOTerm build/2x/PLATOTerm
 	cp dist/1.x/files/template.adf dist/1.x/PLATOTerm.adf
-	cp build/PLATOTerm dist/1.x/PLATOTerm
+	cp build/1x/PLATOTerm dist/1.x/PLATOTerm
 	cp dist/1.x/files/PLATOTerm.info dist/1.x/PLATOTerm.info
-	xdftool dist/1.x/PLATOTerm.adf write build/PLATOTerm /
+	xdftool dist/1.x/PLATOTerm.adf write build/1x/PLATOTerm /
 	xdftool dist/1.x/PLATOTerm.adf write "dist/docs/Read Me" /
 	cp dist/2.x/files/template.adf dist/2.x/PLATOTerm.adf
-	cp build/PLATOTerm dist/2.x/PLATOTerm
+	cp build/2x/PLATOTerm dist/2.x/PLATOTerm
 	cp dist/1.x/files/PLATOTerm.info dist/2.x/PLATOTerm.info
-	xdftool dist/2.x/PLATOTerm.adf write build/PLATOTerm /
+	xdftool dist/2.x/PLATOTerm.adf write build/2x/PLATOTerm /
 	xdftool dist/2.x/PLATOTerm.adf write "dist/docs/Read Me" /
 
--include $(DEPS)
+-include $(DEPS1x) $(DEPS2x)
 
 MKDIR_P ?= mkdir -p

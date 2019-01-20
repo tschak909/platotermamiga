@@ -10,6 +10,7 @@
 #include <clib/alib_protos.h>
 #include <clib/exec_protos.h>
 #include <clib/intuition_protos.h>
+#include <clib/ddebug_protos.h>
 #include <exec/memory.h>
 #include <exec/ports.h>
 #include <devices/serial.h>
@@ -20,8 +21,9 @@
 #include "protocol.h"
 #include "prefs.h"
 #include "screen.h"
+#include "keyboard.h"
 #include "menu.h"
-
+#include "requester_devices.h"
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 #define true 1
@@ -44,6 +46,102 @@ static UBYTE *alertTrigger =
   "\x00\x70\x14" "Alert trigger!" "\x00";
 
 /**
+ * io_ctl() handle device open/close with state tracking
+ * see io.h for details
+ */
+int io_ctl(MySer *dev, int op) {
+
+    if(op == IO_OPEN) {
+        if(dev->state != 0x0) { /* Open only makes sense with an empty state */
+            dev->error = 1; 
+            return 1;
+        }
+        dev->readport = CreatePort(NULL,0L);
+        if(dev->readport) {
+            dev->state |= RP_OPEN;
+        }
+        dev->writeport = CreatePort(NULL,0L);
+        if(dev->writeport) {
+            dev->state |= WP_OPEN;
+        }
+        dev->readio = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
+        if(dev->readio) {
+            dev->state |= RIO_OPEN;
+        }
+        dev->writeio = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
+        if(dev->writeio) {
+            dev->state |= WIO_OPEN;
+        }
+
+        if(dev->state == (RP_OPEN | WP_OPEN | RIO_OPEN | WIO_OPEN)) {
+            if(OpenDevice(dev->name,dev->unit_number,(struct IORequest * )dev->readio,0L)){
+                dev->error = 1;
+                return 1;
+            } else { 
+                dev->state |= DEV_OPEN;
+            }
+        }
+        /* Assert that everything was set open */
+        if(dev->state == (RP_OPEN | WP_OPEN | RIO_OPEN | WIO_OPEN | DEV_OPEN)) {
+            return 0;
+        }
+        /* we should not reach here */
+        dev->error = 1;
+        return 1;
+    }
+    
+    /* Attempt to close each open resource in order */
+    if(op == IO_CLOSE) {
+        if(dev->state == 0x0) {
+            return 0;
+        }
+        /* do flush IO/reset dance if it looks like everything is open */
+        if(dev->state == (WP_OPEN|RP_OPEN|RIO_OPEN|WIO_OPEN|DEV_OPEN)) {
+            dev->writeio->IOSer.io_Command = CMD_FLUSH;  /*flush all pending writes */
+            DoIO((struct IORequest *)dev->writeio);
+            if(!CheckIO((struct IORequest *)dev->writeio)) { /* check and abort them anyway if needed */
+                AbortIO((struct IORequest *)dev->writeio);
+                WaitIO((struct IORequest *)dev->writeio);
+            }
+            if(!CheckIO((struct IORequest *)dev->readio)) { /* same for reads */
+                AbortIO((struct IORequest *)dev->readio);
+                WaitIO((struct IORequest *)dev->readio);
+            }
+            dev->readio->IOSer.io_Command = CMD_RESET; /* reset the device just to be paranoid */
+            dev->readio->IOSer.io_Flags = 0;
+            SendIO((struct IORequest *)dev->readio);
+        }
+        /* otherwise we check the state in order and close whatever has it's bit set */
+        if(dev->state & DEV_OPEN) {
+            CloseDevice((struct IORequest *)dev->readio);
+            dev->state &= ~(DEV_OPEN);
+        }
+        if(dev->state & WIO_OPEN) {
+            DeleteExtIO((struct IORequest *)dev->writeio);
+            dev->state &= ~(WIO_OPEN);
+        }
+        if(dev->state & RIO_OPEN) {
+            DeleteExtIO((struct IORequest *)dev->readio);
+            dev->state &= ~(RIO_OPEN);
+        }
+        if(dev->state & WP_OPEN) {
+            DeletePort(dev->writeport);
+            dev->state &= ~(WP_OPEN);
+        }
+        if(dev->state & RP_OPEN) {
+            DeletePort(dev->readport);
+            dev->state &= ~(RP_OPEN);
+        }
+        /* assert that state is now 0 */
+        if(dev->state != 0x0) {
+            dev->error = 1;
+            return 1;
+        }
+        return 0; /*We've done everything we can and things should be a clean state of everything closed now */
+    }
+    return 2; /* we encountred an op we didn't recognise */
+}
+/**
  * io_init() - Set-up the I/O
  */
 void io_init(void)
@@ -54,21 +152,25 @@ void io_init(void)
     done();
 
  retry_io_open:  
-  ms->readport=CreatePort(NULL,0L);
-  ms->writeport=CreatePort(NULL,0L);
-  if (!ms->readport || !ms->writeport)
-    done();
-  
-  ms->readio  = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
-  ms->writeio = (struct IOExtSer *)CreateExtIO(ms->writeport, sizeof(struct IOExtSer));
-  if (!ms->readio || !ms->writeio)
-    done();
-  
-  if (OpenDevice(config.device_name,config.unit_number,(struct IORequest*)ms->readio,0L))
+  sprintf(ms->name,"%s",config.device_name);
+  ms->unit_number = config.unit_number;
+  if (io_ctl(ms,IO_OPEN))
     {
       // We couldn't open the device named in preferences.
-      if (strcmp(config.device_name,"serial.device")==0)
-	done(); // we couldn't open the default serial.device, exit the program.
+      if (strcmp(ms->name,"serial.device")==0)
+      {
+          //can't open even serial.device so pop up the requester.
+          extern struct Window *myWindow;
+          extern unsigned char device_requester_is_active;
+          io_ctl(ms,IO_CLOSE);
+          requester_devices_run();
+          for(;;) { /* this duplicates the mainloop but blocks io_init until the requester finishes */
+              Wait(1L << myWindow->UserPort->mp_SigBit);   
+              keyboard_main();
+              if(device_requester_is_active == 0)
+                  return;
+          }
+      }
       else
 	{
 	  // serial device was changed from default, and it didn't open, display alert,
@@ -77,15 +179,12 @@ void io_init(void)
 	  prefs_set_defaults();
 
 	  // Clean up, and try again.
-	  DeleteExtIO((struct IORequest *)ms->writeio);
-	  DeleteExtIO((struct IORequest *)ms->readio);
-	  DeletePort(ms->writeport);
-	  DeletePort(ms->readport);
+      io_ctl(ms,IO_CLOSE);
 	  goto retry_io_open;
 	}
     }
-
-  device_is_opened=1; // Device is now open.
+  if(ms->error == 0)
+      device_is_opened=1; // Device is now open.
   
   /* Set parameters from prefs */
   ms->readio->io_RBufLen=config.io_RBufLen;
@@ -139,8 +238,9 @@ void io_create_ports(void)
 void io_send_byte(unsigned char b)
 {
   if (read_io_active==false)
-    return;
-
+      return;
+  if(device_is_opened == 0)
+      return;
   ms->writeio->IOSer.io_Command = CMD_WRITE;
   ms->writeio->IOSer.io_Flags = 0;
   ms->writeio->IOSer.io_Length = 1;
@@ -230,69 +330,12 @@ void io_done(void)
 {
   if (ms!=NULL)
     {
-      // Abort any pending I/O transactions.
-      if (ms->writeio != NULL)
-	{
-      /* Don't wait on a write that may never complete.
-       * Flush it!
-       */
-      ms->writeio->IOSer.io_Command = CMD_FLUSH; 
-      DoIO((struct IORequest *)ms->writeio);
-      /* We don't want to chance a hang on WaitIO so only
-       * AbortIO if we have to 
-       */
-      if(!(CheckIO((struct IORequest *)ms->writeio)))
-      {
-          AbortIO((struct IORequest *)ms->writeio);
-          WaitIO((struct IORequest *)ms->writeio);
-      }
-	}
-      
-      if (ms->readio != NULL)
-	{
-      /* We don't want to chance a hang on WaitIO so only
-       * AbortIO if we have to 
-       */
-      if(!(CheckIO((struct IORequest *)ms->readio)))
-      {
-          AbortIO((struct IORequest *)ms->readio);
-          WaitIO((struct IORequest *)ms->readio);
-      }
-	}
-
-      /**
-       * Reset serial port to default values
-       */
-      ms->readio->IOSer.io_Command=CMD_RESET;
-      ms->readio->IOSer.io_Flags = 0;
-      SendIO((struct IORequest *)ms->readio);
-      
-      // Close device
-      if (device_is_opened==1)
-	{
-	  CloseDevice((struct IORequest *)ms->readio);
-	  device_is_opened=0;
-	}
-
-      // Delete the IO requests.
-      if (ms->writeio != NULL)
-	{
-	  DeleteExtIO((struct IORequest *)ms->writeio);
-	}
-      if (ms->readio != NULL)
-	{
-	  DeleteExtIO((struct IORequest *)ms->readio);
-	}
-
-      // Delete the ports
-      if (ms->writeport!=NULL)
-	DeletePort(ms->writeport);
-      if (ms->readport!=NULL)
-	DeletePort(ms->readport);
-
+      io_ctl(ms,IO_CLOSE);
       // Finally, free the serial I/O structure
       FreeMem(ms,sizeof(MySer));
     }
+   device_is_opened = 0;
+   read_io_active = 0;
 }
 
 /**
