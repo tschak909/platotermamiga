@@ -17,10 +17,10 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := -I$(NDK_INC) $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS1x ?= +kick13 -c99 $(INC_FLAGS) 
-LDFLAGS1x := -lamiga -lauto -lm13 
+LDFLAGS1x := -lamiga -lauto
 
 CPPFLAGS2x ?= +aos68k -c99 $(INC_FLAGS) 
-LDFLAGS2x := -lamiga -lauto -lmsoft
+LDFLAGS2x := -lamiga -lauto
 
 all: $(BUILD_DIR)/1x/PLATOTerm $(BUILD_DIR)/2x/PLATOTerm
 $(BUILD_DIR)/1x/PLATOTerm: $(OBJS1x)
