@@ -14,7 +14,6 @@
 #include <exec/memory.h>
 #include <exec/ports.h>
 #include <devices/serial.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "io.h"

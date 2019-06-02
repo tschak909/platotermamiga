@@ -50,7 +50,9 @@ unsigned long current_background=0;
 padRGB current_foreground_rgb={255,255,255};
 padRGB current_background_rgb={0,0,0};
 unsigned char* fontm23;
+unsigned char* fontm23_16;
 unsigned short* fontm23_bold;
+unsigned short* fontm23_bold32;
 unsigned char is_mono=0;
 unsigned char highest_color_index=0;
 padRGB palette[16];
@@ -159,17 +161,28 @@ void screen_init(void)
 
   /* end of scratch space init XXX! add error checking */
   font_init_platoFont();
+  font_init_plato16Font();
   font_init_platoBoldFont();
+  font_init_plato32Font();
   font_init_platoUserFont();
+  font_init_platoUser16Font();
   font_init_platoBoldUserFont();
+  font_init_platoBoldUser32Font();
   AddFont(&platoFont);
+  AddFont(&plato16Font);
   AddFont(&platoBoldFont);
+  AddFont(&plato32Font);
   AddFont(&platoUserFont);
+  AddFont(&platoUser16Font);
   AddFont(&platoBoldUserFont);
+  AddFont(&platoUser32Font);
   
   // Reach into the font strike data...
   fontm23=(unsigned char*)platoUserFont.tf_CharData;
+  fontm23_16=(unsigned char*)platoUser16Font.tf_CharData;
   fontm23_bold=(unsigned short*)platoBoldUserFont.tf_CharData;
+  fontm23_bold32=(unsigned short*)platoUser32Font.tf_CharData;
+  
 }
 
 /**
@@ -580,9 +593,13 @@ void screen_paint(padPt* Coord)
 void screen_done(void)
 {
   RemFont(&platoFont);
+  RemFont(&plato16Font);
   RemFont(&platoBoldFont);
+  RemFont(&plato32Font);
   RemFont(&platoUserFont);
+  RemFont(&platoUser16Font);
   RemFont(&platoBoldUserFont);
+  RemFont(&platoUser32Font);
   
   if (myWindow)
     {
