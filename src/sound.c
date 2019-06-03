@@ -201,7 +201,6 @@ char *errormsgs[] = {
 void FinishSound(int finishcode)
    {
    int i;
-   printf(errormsgs[finishcode]);
    switch(finishcode)
       {
    case 0:
@@ -306,7 +305,6 @@ void setwpv(char *wf,int len, int  per,int  vol,int voice)
    error = (int) CheckIO((struct IORequest *)freeioa[voice]);
    if (error)
       {
-      printf("Error on CMD_WRITE\n");
       WaitIO((struct IORequest *)freeioa[voice]);
       }
    waiting[voice] = YES;

@@ -134,14 +134,14 @@ void screen_init(void)
 
   // Determine if we are running in PAL mode by looking at NormalRows in GFXBase
   // If so, fix up screen and window structures to compensate.
-  /* if (GfxBase->NormalDisplayRows > 400) */
-  /*   { */
+  if (GfxBase->NormalDisplayRows > 200)
+    {
       PALmode=1;
       Screen1.Height=512;
       winlayout.Height=511;
       winlayout.MinHeight=512;
       winlayout.MaxHeight=512;
-    /* } */
+    }
   
   if (lowmem_flag||config.close_workbench) /* low memory detcted close the workbench to help free memory */
       CloseWorkBench();
