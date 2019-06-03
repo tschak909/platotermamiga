@@ -141,7 +141,6 @@ void requester_print_do(void)
 	    }
 	  else
 	    {
-	      printf("Couldnt open device\n");
 	      // Couldn't open device.
 	      DeleteExtIO((struct IORequest *)PIO);
 	      DeletePort(printerMP);
@@ -150,7 +149,6 @@ void requester_print_do(void)
 	}
       else
 	{
-	  printf("Couldnt create extio\n");
 	  // Couldn't create extio request
 	  DeletePort(printerMP);
 	  return;
@@ -158,12 +156,9 @@ void requester_print_do(void)
     }
   else
     {
-      printf("Couldnt create messageport.\n");
       // Couldn't create message port
       return;
     }
-
-  printf("We printededed.");
   CloseDevice((struct IORequest *)PIO);
   DeleteExtIO((struct IORequest *)PIO);
   DeletePort(printerMP);
