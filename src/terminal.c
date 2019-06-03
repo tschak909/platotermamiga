@@ -57,7 +57,10 @@ static unsigned char pix_cnt;
 static unsigned char curr_word;
 
 extern unsigned char* fontm23;
+extern unsigned char* fontm23_16;
 extern unsigned short* fontm23_bold;
+extern unsigned short* fontm23_bold32;
+extern unsigned char PALmode;
 
 /**
  * Initialize terminal state
@@ -257,45 +260,98 @@ void terminal_char_load(padWord charNum, charData theChar)
 	}      
     }
   
-  
-  fontm23[(charNum)+0]=char_data[0];
-  fontm23[(charNum)+128]=char_data[1];
-  fontm23[(charNum)+256]=char_data[2]|char_data[3];
-  fontm23[(charNum)+384]=char_data[4];
-  fontm23[(charNum)+512]=char_data[5];
-  fontm23[(charNum)+640]=char_data[6]|char_data[7];
-  fontm23[(charNum)+768]=char_data[8];
-  fontm23[(charNum)+896]=char_data[9];
-  fontm23[(charNum)+1024]=char_data[10]|char_data[11];
-  fontm23[(charNum)+1152]=char_data[12];
-  fontm23[(charNum)+1280]=char_data[13];
-  fontm23[(charNum)+1408]=char_data[14]|char_data[15];
+  if (PALmode==1)
+    {
+      fontm23_16[(charNum)+0]=char_data[0];
+      fontm23_16[(charNum)+128]=char_data[1];
+      fontm23_16[(charNum)+256]=char_data[2];
+      fontm23_16[(charNum)+384]=char_data[3];
+      fontm23_16[(charNum)+512]=char_data[4];
+      fontm23_16[(charNum)+640]=char_data[5];
+      fontm23_16[(charNum)+768]=char_data[6];
+      fontm23_16[(charNum)+896]=char_data[7];
+      fontm23_16[(charNum)+1024]=char_data[8];
+      fontm23_16[(charNum)+1152]=char_data[9];
+      fontm23_16[(charNum)+1280]=char_data[10];
+      fontm23_16[(charNum)+1408]=char_data[11];
+      fontm23_16[(charNum)+1536]=char_data[12];
+      fontm23_16[(charNum)+1664]=char_data[13];
+      fontm23_16[(charNum)+1792]=char_data[14]|char_data[15];
 
-  // Put bold_char_data into bold character set.
-  fontm23_bold[(charNum)+0]=bold_char_data[0];
-  fontm23_bold[(charNum)+128]=bold_char_data[1];
-  fontm23_bold[(charNum)+256]=bold_char_data[2];
-  fontm23_bold[(charNum)+384]=bold_char_data[3];
-  fontm23_bold[(charNum)+512]=bold_char_data[4]|bold_char_data[5];
-  fontm23_bold[(charNum)+640]=bold_char_data[6]|bold_char_data[7];
-  fontm23_bold[(charNum)+768]=bold_char_data[8];
-  fontm23_bold[(charNum)+896]=bold_char_data[9];
-  fontm23_bold[(charNum)+1024]=bold_char_data[10];
-  fontm23_bold[(charNum)+1152]=bold_char_data[11];
-  fontm23_bold[(charNum)+1280]=bold_char_data[12]|bold_char_data[13];
-  fontm23_bold[(charNum)+1408]=bold_char_data[14]|bold_char_data[15];
-  fontm23_bold[(charNum)+1536]=bold_char_data[16];
-  fontm23_bold[(charNum)+1664]=bold_char_data[17];
-  fontm23_bold[(charNum)+1792]=bold_char_data[18];
-  fontm23_bold[(charNum)+1920]=bold_char_data[19];
-  fontm23_bold[(charNum)+2048]=bold_char_data[20]|bold_char_data[21];
-  fontm23_bold[(charNum)+2176]=bold_char_data[22]|bold_char_data[23];
-  fontm23_bold[(charNum)+2304]=bold_char_data[24];
-  fontm23_bold[(charNum)+2432]=bold_char_data[25];
-  fontm23_bold[(charNum)+2560]=bold_char_data[26];
-  fontm23_bold[(charNum)+2688]=bold_char_data[27];
-  fontm23_bold[(charNum)+2816]=bold_char_data[28]|bold_char_data[29];
-  fontm23_bold[(charNum)+2944]=bold_char_data[30]|bold_char_data[31];  
+      fontm23_bold32[(charNum)+0]=bold_char_data[0];
+      fontm23_bold32[(charNum)+128]=bold_char_data[1];
+      fontm23_bold32[(charNum)+256]=bold_char_data[2];
+      fontm23_bold32[(charNum)+384]=bold_char_data[3];
+      fontm23_bold32[(charNum)+512]=bold_char_data[4];
+      fontm23_bold32[(charNum)+640]=bold_char_data[5];
+      fontm23_bold32[(charNum)+768]=bold_char_data[6];
+      fontm23_bold32[(charNum)+896]=bold_char_data[7];
+      fontm23_bold32[(charNum)+1024]=bold_char_data[8];
+      fontm23_bold32[(charNum)+1152]=bold_char_data[9];
+      fontm23_bold32[(charNum)+1280]=bold_char_data[10];
+      fontm23_bold32[(charNum)+1408]=bold_char_data[11];
+      fontm23_bold32[(charNum)+1536]=bold_char_data[12];
+      fontm23_bold32[(charNum)+1664]=bold_char_data[13];
+      fontm23_bold32[(charNum)+1792]=bold_char_data[14];
+      fontm23_bold32[(charNum)+1920]=bold_char_data[15];
+      fontm23_bold32[(charNum)+2048]=bold_char_data[16];
+      fontm23_bold32[(charNum)+2176]=bold_char_data[17];
+      fontm23_bold32[(charNum)+2304]=bold_char_data[18];
+      fontm23_bold32[(charNum)+2432]=bold_char_data[19];
+      fontm23_bold32[(charNum)+2560]=bold_char_data[20];
+      fontm23_bold32[(charNum)+2688]=bold_char_data[21];
+      fontm23_bold32[(charNum)+2816]=bold_char_data[22];
+      fontm23_bold32[(charNum)+2944]=bold_char_data[23];
+      fontm23_bold32[(charNum)+3072]=bold_char_data[24];
+      fontm23_bold32[(charNum)+3200]=bold_char_data[25];
+      fontm23_bold32[(charNum)+3328]=bold_char_data[26];
+      fontm23_bold32[(charNum)+3456]=bold_char_data[27];
+      fontm23_bold32[(charNum)+3584]=bold_char_data[28];
+      fontm23_bold32[(charNum)+3712]=bold_char_data[29];
+      fontm23_bold32[(charNum)+3840]=bold_char_data[30]|bold_char_data[31];      
+    }
+  else
+    {
+      fontm23[(charNum)+0]=char_data[0];
+      fontm23[(charNum)+128]=char_data[1];
+      fontm23[(charNum)+256]=char_data[2]|char_data[3];
+      fontm23[(charNum)+384]=char_data[4];
+      fontm23[(charNum)+512]=char_data[5];
+      fontm23[(charNum)+640]=char_data[6]|char_data[7];
+      fontm23[(charNum)+768]=char_data[8];
+      fontm23[(charNum)+896]=char_data[9];
+      fontm23[(charNum)+1024]=char_data[10]|char_data[11];
+      fontm23[(charNum)+1152]=char_data[12];
+      fontm23[(charNum)+1280]=char_data[13];
+      fontm23[(charNum)+1408]=char_data[14]|char_data[15];
+      
+      // Put bold_char_data into bold character set.
+      fontm23_bold[(charNum)+0]=bold_char_data[0];
+      fontm23_bold[(charNum)+128]=bold_char_data[1];
+      fontm23_bold[(charNum)+256]=bold_char_data[2];
+      fontm23_bold[(charNum)+384]=bold_char_data[3];
+      fontm23_bold[(charNum)+512]=bold_char_data[4]|bold_char_data[5];
+      fontm23_bold[(charNum)+640]=bold_char_data[6]|bold_char_data[7];
+      fontm23_bold[(charNum)+768]=bold_char_data[8];
+      fontm23_bold[(charNum)+896]=bold_char_data[9];
+      fontm23_bold[(charNum)+1024]=bold_char_data[10];
+      fontm23_bold[(charNum)+1152]=bold_char_data[11];
+      fontm23_bold[(charNum)+1280]=bold_char_data[12]|bold_char_data[13];
+      fontm23_bold[(charNum)+1408]=bold_char_data[14]|bold_char_data[15];
+      fontm23_bold[(charNum)+1536]=bold_char_data[16];
+      fontm23_bold[(charNum)+1664]=bold_char_data[17];
+      fontm23_bold[(charNum)+1792]=bold_char_data[18];
+      fontm23_bold[(charNum)+1920]=bold_char_data[19];
+      fontm23_bold[(charNum)+2048]=bold_char_data[20]|bold_char_data[21];
+      fontm23_bold[(charNum)+2176]=bold_char_data[22]|bold_char_data[23];
+      fontm23_bold[(charNum)+2304]=bold_char_data[24];
+      fontm23_bold[(charNum)+2432]=bold_char_data[25];
+      fontm23_bold[(charNum)+2560]=bold_char_data[26];
+      fontm23_bold[(charNum)+2688]=bold_char_data[27];
+      fontm23_bold[(charNum)+2816]=bold_char_data[28]|bold_char_data[29];
+      fontm23_bold[(charNum)+2944]=bold_char_data[30]|bold_char_data[31];  
+    }
+  
 }
 
 /**

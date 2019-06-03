@@ -56,6 +56,7 @@ unsigned short* fontm23_bold32;
 unsigned char is_mono=0;
 unsigned char highest_color_index=0;
 padRGB palette[16];
+unsigned char PALmode;  // use full size fonts, if you have 512 lines or greater.
 
 #define MAX(a,b)    ((a)>(b)?(a):(b))
 #define MIN(a,b)    ((a)<(b)?(a):(b))
@@ -131,6 +132,17 @@ void screen_init(void)
   if (!GfxBase)
     done();
 
+  // Determine if we are running in PAL mode by looking at NormalRows in GFXBase
+  // If so, fix up screen and window structures to compensate.
+  /* if (GfxBase->NormalDisplayRows > 400) */
+  /*   { */
+      PALmode=1;
+      Screen1.Height=512;
+      winlayout.Height=511;
+      winlayout.MinHeight=512;
+      winlayout.MaxHeight=512;
+    /* } */
+  
   if (lowmem_flag||config.close_workbench) /* low memory detcted close the workbench to help free memory */
       CloseWorkBench();
 
@@ -161,27 +173,27 @@ void screen_init(void)
 
   /* end of scratch space init XXX! add error checking */
   font_init_platoFont();
-  font_init_plato16Font();
+  font_init_plato15Font();
   font_init_platoBoldFont();
-  font_init_plato32Font();
+  font_init_plato30Font();
   font_init_platoUserFont();
-  font_init_platoUser16Font();
+  font_init_platoUser15Font();
   font_init_platoBoldUserFont();
-  font_init_platoBoldUser32Font();
+  font_init_platoBoldUser30Font();
   AddFont(&platoFont);
-  AddFont(&plato16Font);
+  AddFont(&plato15Font);
   AddFont(&platoBoldFont);
-  AddFont(&plato32Font);
+  AddFont(&plato30Font);
   AddFont(&platoUserFont);
-  AddFont(&platoUser16Font);
+  AddFont(&platoUser15Font);
   AddFont(&platoBoldUserFont);
-  AddFont(&platoUser32Font);
+  AddFont(&platoUser30Font);
   
   // Reach into the font strike data...
   fontm23=(unsigned char*)platoUserFont.tf_CharData;
-  fontm23_16=(unsigned char*)platoUser16Font.tf_CharData;
+  fontm23_16=(unsigned char*)platoUser15Font.tf_CharData;
   fontm23_bold=(unsigned short*)platoBoldUserFont.tf_CharData;
-  fontm23_bold32=(unsigned short*)platoUser32Font.tf_CharData;
+  fontm23_bold32=(unsigned short*)platoUser30Font.tf_CharData;
   
 }
 
@@ -371,11 +383,22 @@ void screen_set_pen_mode(void)
 void screen_block_draw(padPt* Coord1, padPt* Coord2)
 {
   screen_set_pen_mode();
-  RectFill(myWindow->RPort,
-	   MIN(scalex[Coord1->x],scalex[Coord2->x]),
-	   MIN(scaley[Coord1->y],scaley[Coord2->y]),
-	   MAX(scalex[Coord2->x],scalex[Coord1->x]),
-	   MAX(scaley[Coord2->y],scaley[Coord1->y]));
+  if (PALmode==1)
+    {
+      RectFill(myWindow->RPort,
+	       MIN(scalex[Coord1->x],scalex[Coord2->x]),
+	       MIN(scaley_480[Coord1->y],scaley_480[Coord2->y]),
+	       MAX(scalex[Coord2->x],scalex[Coord1->x]),
+	       MAX(scaley_480[Coord2->y],scaley_480[Coord1->y]));
+    }
+  else
+    {
+      RectFill(myWindow->RPort,
+	       MIN(scalex[Coord1->x],scalex[Coord2->x]),
+	       MIN(scaley[Coord1->y],scaley[Coord2->y]),
+	       MAX(scalex[Coord2->x],scalex[Coord1->x]),
+	       MAX(scaley[Coord2->y],scaley[Coord1->y]));
+    }
 }
 
 /**
@@ -384,7 +407,14 @@ void screen_block_draw(padPt* Coord1, padPt* Coord2)
 void screen_dot_draw(padPt* Coord)
 {
   screen_set_pen_mode();
-  WritePixel(myWindow->RPort,scalex[Coord->x],scaley[Coord->y]);
+  if (PALmode==1)
+    {
+      WritePixel(myWindow->RPort,scalex[Coord->x],scaley_480[Coord->y]);
+    }
+  else
+    {
+      WritePixel(myWindow->RPort,scalex[Coord->x],scaley[Coord->y]);
+    }
 }
 
 /**
@@ -393,8 +423,16 @@ void screen_dot_draw(padPt* Coord)
 void screen_line_draw(padPt* Coord1, padPt* Coord2)
 {
   screen_set_pen_mode();
-  Move(myWindow->RPort,scalex[Coord1->x],scaley[Coord1->y]);
-  Draw(myWindow->RPort,scalex[Coord2->x],scaley[Coord2->y]);
+  if (PALmode==1)
+    {
+      Move(myWindow->RPort,scalex[Coord1->x],scaley_480[Coord1->y]);
+      Draw(myWindow->RPort,scalex[Coord2->x],scaley_480[Coord2->y]);
+    }
+  else
+    {
+      Move(myWindow->RPort,scalex[Coord1->x],scaley[Coord1->y]);
+      Draw(myWindow->RPort,scalex[Coord2->x],scaley[Coord2->y]);
+    }
 }
 
 /**
@@ -412,31 +450,71 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
   switch(CurMem)
     {
     case M0:
-      if (ModeBold)
-	SetFont(myWindow->RPort,&platoBoldFont);
+      if (PALmode==1)
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&plato30Font);
+	  else
+	    SetFont(myWindow->RPort,&plato15Font); 
+	}
       else
-	SetFont(myWindow->RPort,&platoFont);
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&platoBoldFont);
+	  else
+	    SetFont(myWindow->RPort,&platoFont);
+	}
       offset=0;
       break;
     case M1:
-      if (ModeBold)
-	SetFont(myWindow->RPort,&platoBoldFont);
+      if (PALmode==1)
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&plato30Font);
+	  else
+	    SetFont(myWindow->RPort,&plato15Font); 
+	}
       else
-	SetFont(myWindow->RPort,&platoFont);
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&platoBoldFont);
+	  else
+	    SetFont(myWindow->RPort,&platoFont);
+	}
       offset=96;
       break;
     case M2:
-      if (ModeBold)
-	SetFont(myWindow->RPort,&platoBoldUserFont);
+      if (PALmode==1)
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&platoUser30Font);
+	  else
+	    SetFont(myWindow->RPort,&platoUser15Font); 
+	}
       else
-	SetFont(myWindow->RPort,&platoUserFont);
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&platoBoldUserFont);
+	  else
+	    SetFont(myWindow->RPort,&platoUserFont);
+	}
       offset=-32;
       break;
     case M3:
-      if (ModeBold)
-	SetFont(myWindow->RPort,&platoBoldUserFont);
+      if (PALmode==1)
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&platoUser30Font);
+	  else
+	    SetFont(myWindow->RPort,&platoUser15Font); 
+	}
       else
-	SetFont(myWindow->RPort,&platoUserFont);
+	{
+	  if (ModeBold)
+	    SetFont(myWindow->RPort,&platoBoldUserFont);
+	  else
+	    SetFont(myWindow->RPort,&platoUserFont);
+	}      
       offset=32;
       break;
     }
@@ -464,15 +542,21 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
     }
 
   x=scalex[Coord->x];
-  y=scaley[Coord->y]-3;
-
+  if (PALmode==1)
+    {
+      y=scaley_480[Coord->y]-4;
+    }
+  else
+    {
+      y=scaley[Coord->y]-3;
+    }
+  
   for (i=0;i<count;++i)
     ch[i]+=offset;
   
   Move(myWindow->RPort,x,y);
   Text(myWindow->RPort,ch,count);
   clipboard_update_buffer(Coord,ch,count);
-
 }
 
 /**
@@ -582,7 +666,14 @@ void screen_paint(padPt* Coord)
 {
   if(!config.paint_enabled) return;
   SetOPen(myWindow->RPort,current_foreground);
-  Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]);
+  if (PALmode==1)
+    {
+      Flood(myWindow->RPort,0,scalex[Coord->x],scaley_480[Coord->y]);      
+    }
+  else
+    {
+      Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]);
+    }
   BNDRYOFF(myWindow->RPort);
 }
 
@@ -593,13 +684,13 @@ void screen_paint(padPt* Coord)
 void screen_done(void)
 {
   RemFont(&platoFont);
-  RemFont(&plato16Font);
+  RemFont(&plato15Font);
   RemFont(&platoBoldFont);
-  RemFont(&plato32Font);
+  RemFont(&plato30Font);
   RemFont(&platoUserFont);
-  RemFont(&platoUser16Font);
+  RemFont(&platoUser15Font);
   RemFont(&platoBoldUserFont);
-  RemFont(&platoUser32Font);
+  RemFont(&platoUser30Font);
   
   if (myWindow)
     {
