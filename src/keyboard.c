@@ -32,8 +32,10 @@ unsigned char shift_state=0;
 extern void done(void);
 extern unsigned short scaletx[];
 extern unsigned short scalety[];
+extern unsigned short scalety_480[];
 extern unsigned char device_requester_is_active;
 extern struct Gadget devicesRequesterGadget_apply;
+extern unsigned char PALmode;
 
 /**
  * keyboard_out - If platoKey < 0x7f, pass off to protocol
@@ -85,13 +87,27 @@ void keyboard_main(void)
       }
       else if (intuition_msg->Class == MOUSEBUTTONS)
 	{
-	  if ((intuition_msg->MouseX + 64) < 640 &&
-	      (intuition_msg->MouseX + 64) > 64  &&
-	      (intuition_msg->MouseY) < 400      &&
-	      (intuition_msg->MouseY) > 0)
+	  if (PALmode==1)
 	    {
-	      padPt Coord={scaletx[intuition_msg->MouseX-64],scalety[intuition_msg->MouseY]};
-	      Touch(&Coord);
+	      if ((intuition_msg->MouseX + 64) < 640 &&
+		  (intuition_msg->MouseX + 64) > 64  &&
+		  (intuition_msg->MouseY) < 480      &&
+		  (intuition_msg->MouseY) > 0)
+		{
+		  padPt Coord={scaletx[intuition_msg->MouseX-64],scalety_480[intuition_msg->MouseY]};
+		  Touch(&Coord);
+		}
+	    }
+	  else
+	    {
+	      if ((intuition_msg->MouseX + 64) < 640 &&
+		  (intuition_msg->MouseX + 64) > 64  &&
+		  (intuition_msg->MouseY) < 400      &&
+		  (intuition_msg->MouseY) > 0)
+		{
+		  padPt Coord={scaletx[intuition_msg->MouseX-64],scalety[intuition_msg->MouseY]};
+		  Touch(&Coord);
+		}  
 	    }
 	}
       else if (intuition_msg->Class == RAWKEY)
