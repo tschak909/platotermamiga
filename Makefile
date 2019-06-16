@@ -11,7 +11,7 @@ DEPS := $(OBJS:.o=.d)
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CFLAGS ?= -Os
+CFLAGS ?= -Os -DVERSION='"0.5"' -D__AMIGADATE__='"("__DATE__")"'
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 LDFLAGS := -lamiga
 
