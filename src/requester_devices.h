@@ -20,4 +20,10 @@ void requester_devices_run(void);
  */
 void requester_devices_done(void);
 
+/**
+ * Called when the devices requester has been dismissed without the
+ * settings being applied.
+ */
+void requester_devices_cancel(void);
+
 #endif

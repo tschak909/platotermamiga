@@ -8,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <proto/intuition.h>
 #include <proto/dos.h>
 #include <intuition/screens.h>
@@ -217,7 +218,7 @@ void screen_update_colors(void)
  */
 void screen_update_title(void)
 {
-  sprintf(windowTitle,"PLATOTerm | %6ld | N81 | %s | %s | Recv Buf Len: %6ld",io_status_baud(),io_status_serflags(),terminal_status(),io_status_rbuflen());
+  sprintf(windowTitle,"PLATOTerm | %6d | N81 | %s | %s | Recv Buf Len: %6lu",io_status_baud(),io_status_serflags(),terminal_status(),io_status_rbuflen());
   SetWindowTitles(myWindow,windowTitle,windowTitle);
 }
 
@@ -226,6 +227,10 @@ void screen_update_title(void)
  */
 void screen_wait(void)
 {
+  /* Wait for a single clock tick, which is 1/50th of a second on an NTSC
+   * display and 1/60th of a second on a PAL display.
+   */
+  Delay(1);
 }
 
 /**
@@ -295,7 +300,7 @@ void screen_about(void)
 
   char reqTitle[]="About PLATOTerm";
   SetWindowTitles(myWindow,reqTitle,reqTitle);
-  AutoRequest(myWindow, &my_body_text, NULL, &my_negative_text, NULL, NULL, 320, 88);  
+  AutoRequest(myWindow, &my_body_text, NULL, &my_negative_text, 0L, 0L, 320, 88);  
   screen_update_title();
 }
 
@@ -333,8 +338,8 @@ void screen_clear(void)
   palette[0].green=current_background_rgb.green;
   palette[0].blue=current_background_rgb.blue;
 
-  if ((current_background_rgb.red   != current_foreground_rgb.red) &&
-      (current_background_rgb.green != current_foreground_rgb.green) &&
+  if ((current_background_rgb.red   != current_foreground_rgb.red) ||
+      (current_background_rgb.green != current_foreground_rgb.green) ||
       (current_background_rgb.blue  != current_foreground_rgb.blue))
     {
       palette[1].red=current_foreground_rgb.red;
@@ -551,12 +556,17 @@ void screen_char_draw(padPt* Coord, unsigned char* ch, unsigned char count)
       y=scaley[Coord->y]-3;
     }
   
+  /* Copy the characters to the clipboard before they are adjusted for
+   * the current character set, the clipboard should hold the characters
+   * as they were received, not the offset font characters.
+   */
+  clipboard_update_buffer(Coord,ch,count);
+
   for (i=0;i<count;++i)
     ch[i]+=offset;
   
   Move(myWindow->RPort,x,y);
   Text(myWindow->RPort,ch,count);
-  clipboard_update_buffer(Coord,ch,count);
 }
 
 /**
@@ -630,6 +640,8 @@ unsigned char screen_color_matching(padRGB* theColor)
 	    }
 	}
     }
+  /* No free palette entry left, reuse the last one we know about */
+  return highest_color_index;
 }
 
 /**
@@ -668,11 +680,11 @@ void screen_paint(padPt* Coord)
   SetOPen(myWindow->RPort,current_foreground);
   if (PALmode==1)
     {
-      Flood(myWindow->RPort,0,scalex[Coord->x],scaley_480[Coord->y]);      
+      Flood(myWindow->RPort,current_foreground,scalex[Coord->x],scaley_480[Coord->y]);      
     }
   else
     {
-      Flood(myWindow->RPort,0,scalex[Coord->x],scaley[Coord->y]);
+      Flood(myWindow->RPort,current_foreground,scalex[Coord->x],scaley[Coord->y]);
     }
   BNDRYOFF(myWindow->RPort);
 }

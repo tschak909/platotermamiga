@@ -20,6 +20,7 @@
 
 extern ConfigInfo config;
 unsigned char device_requester_is_active=0;
+unsigned char device_requester_was_cancelled=0;
 
 SHORT unit_string_border_points[]=
 {
@@ -59,7 +60,7 @@ struct IntuiText unit_string_text=
 
 
 
-UBYTE unit_name_buffer[10]="0"; /* 50 characters including the NULL-sign. */
+UBYTE unit_name_buffer[10]="0"; /* 10 characters including the NULL-sign. */
 UBYTE unit_name_undo_buffer[10]; /* Must be at least as big as unit_name_buffer. */
 
 
@@ -70,7 +71,7 @@ struct StringInfo unit_string_info=
   unit_name_undo_buffer,  /* UndoBuffer, pointer to a null-terminated string. */
                    /* (Remember unit_name_buffer is equal to &unit_name_buffer[0]) */
   0,               /* BufferPos, initial position of the cursor. */
-  10,              /* MaxChars, 50 characters + null-sign ('\0'). */
+  9,               /* MaxChars, 9 characters + null-sign ('\0'). */
   0,               /* DispPos, first character in the string should be */
                    /* first character in the display. */
 
@@ -167,7 +168,7 @@ struct StringInfo device_string_info=
   device_name_undo_buffer,  /* UndoBuffer, pointer to a null-terminated string. */
                    /* (Remember device_name_buffer is equal to &device_name_buffer[0]) */
   0,               /* BufferPos, initial position of the cursor. */
-  50,              /* MaxChars, 50 characters + null-sign ('\0'). */
+  49,              /* MaxChars, 49 characters + null-sign ('\0'). */
   0,               /* DispPos, first character in the string should be */
                    /* first character in the display. */
 
@@ -431,18 +432,48 @@ static struct Requester devicesRequester =
 void requester_devices_run(void)
 {
   unit_string_info.LongInt=config.unit_number;
-  sprintf(unit_name_buffer,"%ld",config.unit_number);
-  strcpy(device_name_buffer,config.device_name);
-  Request(&devicesRequester,myWindow);
-  device_requester_is_active=1;
+  snprintf(unit_name_buffer,sizeof(unit_name_buffer),"%lu",config.unit_number);
+  strncpy(device_name_buffer,config.device_name,sizeof(config.device_name));
+  device_name_buffer[sizeof(device_name_buffer)-1]='\0';
+  if (Request(&devicesRequester,myWindow))
+    {
+      device_requester_is_active=1;
+    }
+  else
+    {
+      /* The requester could not be opened */
+      device_requester_is_active=0;
+    }
+  device_requester_was_cancelled=0;
 }
 
-/** 
+/**
  * Called when devices requester needs to stop.
  */
 void requester_devices_done(void)
 {
-  device_requester_is_active=0;
-  strcpy(config.device_name,device_name_buffer);
+  if (device_requester_is_active)
+    {
+      /* Release the requester, without this it cannot be opened again */
+      EndRequest(&devicesRequester,myWindow);
+      device_requester_is_active=0;
+    }
+  strncpy(config.device_name,device_name_buffer,sizeof(config.device_name)-1);
+  config.device_name[sizeof(config.device_name)-1]='\0';
   config.unit_number=unit_string_info.LongInt;
+}
+
+/**
+ * Called when the devices requester has been dismissed without the
+ * settings being applied.
+ */
+void requester_devices_cancel(void)
+{
+  if (device_requester_is_active)
+    {
+      /* Release the requester, without this it cannot be opened again */
+      EndRequest(&devicesRequester,myWindow);
+      device_requester_is_active=0;
+    }
+  device_requester_was_cancelled=1;
 }

@@ -236,6 +236,11 @@ void terminal_ext_out(padByte value)
 void terminal_char_load(padWord charNum, charData theChar)
 {
   memset(char_data,0,sizeof(char_data));
+  /* The bold data is accumulated with |= below, it has to be cleared
+   * as well, otherwise the character would keep the pixels of the
+   * character that was loaded before it.
+   */
+  memset(bold_char_data,0,sizeof(bold_char_data));
 
   for (curr_word=0;curr_word<8;curr_word++)
     {
@@ -307,8 +312,12 @@ void terminal_char_load(padWord charNum, charData theChar)
       fontm23_bold32[(charNum)+3328]=bold_char_data[26];
       fontm23_bold32[(charNum)+3456]=bold_char_data[27];
       fontm23_bold32[(charNum)+3584]=bold_char_data[28];
+      /* The last row of this font, the font data is only 30 rows high
+       * (the character location table follows it), so there is no room
+       * for the remaining bold rows, writing them would corrupt the
+       * character location table.
+       */
       fontm23_bold32[(charNum)+3712]=bold_char_data[29];
-      fontm23_bold32[(charNum)+3840]=bold_char_data[30]|bold_char_data[31];      
     }
   else
     {

@@ -35,6 +35,7 @@ extern unsigned short scalety[];
 extern unsigned short scalety_480[];
 extern unsigned char device_requester_is_active;
 extern struct Gadget devicesRequesterGadget_apply;
+extern struct Gadget devicesRequesterGadget_cancel;
 extern unsigned char PALmode;
 
 /**
@@ -89,10 +90,10 @@ void keyboard_main(void)
 	{
 	  if (PALmode==1)
 	    {
-	      if ((intuition_msg->MouseX + 64) < 640 &&
-		  (intuition_msg->MouseX + 64) > 64  &&
-		  (intuition_msg->MouseY) < 480      &&
-		  (intuition_msg->MouseY) > 0)
+	      if (intuition_msg->MouseX >= 64 &&
+		  intuition_msg->MouseX < 576      &&
+		  (intuition_msg->MouseY) >= 0     &&
+		  (intuition_msg->MouseY) < 480)
 		{
 		  padPt Coord={scaletx[intuition_msg->MouseX-64],scalety_480[intuition_msg->MouseY]};
 		  Touch(&Coord);
@@ -100,15 +101,16 @@ void keyboard_main(void)
 	    }
 	  else
 	    {
-	      if ((intuition_msg->MouseX + 64) < 640 &&
-		  (intuition_msg->MouseX + 64) > 64  &&
-		  (intuition_msg->MouseY) < 400      &&
-		  (intuition_msg->MouseY) > 0)
+	      if (intuition_msg->MouseX >= 64 &&
+		  intuition_msg->MouseX < 576      &&
+		  (intuition_msg->MouseY) >= 0     &&
+		  (intuition_msg->MouseY) < 384)
 		{
 		  padPt Coord={scaletx[intuition_msg->MouseX-64],scalety[intuition_msg->MouseY]};
 		  Touch(&Coord);
 		}  
 	    }
+	  ReplyMsg((struct Message *) intuition_msg);
 	}
       else if (intuition_msg->Class == RAWKEY)
 	{
@@ -118,6 +120,7 @@ void keyboard_main(void)
 	    keyboard_out(PKEY_HELP1);
 	  else if (intuition_msg->Code==0x5F)
 	    keyboard_out(PKEY_HELP);
+	  ReplyMsg((struct Message *) intuition_msg);
 	}
       else if (intuition_msg->Class == VANILLAKEY)
 	{
@@ -199,17 +202,21 @@ void keyboard_main(void)
       else if (intuition_msg->Class==IDCMP_ACTIVEWINDOW || intuition_msg->Class==IDCMP_INACTIVEWINDOW)
 	{
 	  screen_update_title();
+	  ReplyMsg((struct Message *) intuition_msg);
 	}
       /* handle menu selection messages */
       else if (intuition_msg->Class == IDCMP_MENUPICK)
 	{
           menuNumber = intuition_msg->Code;
-          menuNum = MENUNUM(menuNumber);
-          itemNum = ITEMNUM(menuNumber);
-          subNum = SUBNUM(menuNumber);
           while(menuNumber != MENUNULL)
 	    {
 	      item = ItemAddress(&menuTerminal,menuNumber); 
+              /* The menu number of the item being processed, this has to be
+               * recalculated for every item in the selection chain.
+               */
+              menuNum = MENUNUM(menuNumber);
+              itemNum = ITEMNUM(menuNumber);
+              subNum = SUBNUM(menuNumber);
 	      if(menuNum == 0 && itemNum == 5 && subNum == 31)
 		{
 		  done();
@@ -297,17 +304,31 @@ void keyboard_main(void)
 		}
 	      menuNumber = item->NextSelect;
 	    }
+	  ReplyMsg((struct Message *) intuition_msg);
 	}
-      else if (device_requester_is_active==1)
+      else if (intuition_msg->Class == GADGETUP)
 	{
 	  // TODO: come back here and add code to focus unit gadget if enter pressed in device menu.
-	  if (intuition_msg->Class==GADGETUP && intuition_msg->IAddress == (APTR) &devicesRequesterGadget_apply)
+	  if (intuition_msg->IAddress == (APTR) &devicesRequesterGadget_apply)
 	    {
 	      requester_devices_done();
 	      prefs_save();
 	      io_done();
 	      io_init();
 	    }
+	  else if (intuition_msg->IAddress == (APTR) &devicesRequesterGadget_cancel)
+	    {
+	      /* The requester was dismissed without applying the settings,
+	       * it must not be left marked as active, otherwise io_init()
+	       * would wait for it to be closed forever.
+	       */
+	      requester_devices_cancel();
+	    }
+	  ReplyMsg((struct Message *) intuition_msg);
+	}
+      else
+	{
+	  ReplyMsg((struct Message *) intuition_msg);
 	}
     }
 }

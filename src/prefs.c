@@ -42,17 +42,28 @@ void prefs_set_defaults(void)
  */
 void prefs_load(void)
 {
+  long bytesRead;
+
   fileHandle=Open(PREFS_FILE,MODE_OLDFILE);
   if (fileHandle==0)
-  {
-    fileHandle=Open(PREFS_FILE,MODE_NEWFILE);
-    Close(fileHandle);
-    prefs_set_defaults();
-  }
+    {
+      fileHandle=Open(PREFS_FILE,MODE_NEWFILE);
+      Close(fileHandle);
+      prefs_set_defaults();
+    }
   else
     {
-      Read(fileHandle,&config,sizeof(config));
+      bytesRead=Read(fileHandle,&config,sizeof(config));
       Close(fileHandle);
+
+      if (bytesRead!=(long)sizeof(config))
+        {
+          /* The preferences file is truncated or unreadable, use the defaults */
+          prefs_set_defaults();
+        }
+
+      /* Make sure the device name is always NULL terminated */
+      config.device_name[sizeof(config.device_name)-1]='\0';
     }
 }
 
