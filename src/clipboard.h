@@ -10,6 +10,7 @@
 #ifndef CLIPBOARD_H
 #define CLIPBOARD_H
 
+#include <exec/types.h>
 #include "protocol.h"
 
 /**
@@ -40,7 +41,7 @@ unsigned char clipboard_update_buffer(padPt* Coord, unsigned char* ch, unsigned 
 /**
  * Write 4 bytes to clipboard device. Used for headers
  */
-void clipboard_write_long(long* data);
+void clipboard_write_long(ULONG* data);
 
 /**
  * Write text to clipboard

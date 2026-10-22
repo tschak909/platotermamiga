@@ -448,8 +448,15 @@ Blockx (void)
       LoadCoordx (&NewCoord);
       screen_block_draw (&CurCoord, &NewCoord);
       SubMode = 0;
+      /* The current position is set to the first coordinate of the block,
+       * 15 dots below it (see the PLATO terminal protocol), all
+       * coordinates are modulo 512.
+       */
       CurCoord.y-=15;
-      CurCoord.x+=16;
+      if (CurCoord.y < 0)
+	CurCoord.y += PLATOSize.y;
+      else if (CurCoord.y >= PLATOSize.y)
+	CurCoord.y -= PLATOSize.y;
     }
 }
 
@@ -937,6 +944,7 @@ ShowPLATO (padByte *buff, unsigned short count)
 		{
 		case 0x00:
 		  screen_wait();
+		  break;
 		case 0x08:
 		  BSx ();
 		  break;

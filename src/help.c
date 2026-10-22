@@ -131,19 +131,23 @@ struct Window *win;
 
     msg = (struct IntuiMessage *) mp->mp_MsgList.lh_Head;
 
-    while( succ =  msg->ExecMessage.mn_Node.ln_Succ ) {
-
-    if( msg->IDCMPWindow ==  win ) {
-
-        /* Intuition is about to free this message.
-         * Make sure that we have politely sent it back.
+    while(msg) {
+        /* Remember the next message before this one is removed, the
+         * successor pointer of a removed message is cleared.
          */
-        Remove((struct Node *)  msg );
+        succ = msg->ExecMessage.mn_Node.ln_Succ;
 
-        ReplyMsg((struct Message *) msg );
-    }
+        if( msg->IDCMPWindow ==  win ) {
 
-    msg = (struct IntuiMessage *) succ;
+            /* Intuition is about to free this message.
+             * Make sure that we have politely sent it back.
+             */
+            Remove((struct Node *)  msg );
+
+            ReplyMsg((struct Message *) msg );
+        }
+
+        msg = (struct IntuiMessage *) succ;
     }
 }
 /**

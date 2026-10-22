@@ -10,10 +10,10 @@
 #include <clib/alib_protos.h>
 #include <clib/exec_protos.h>
 #include <clib/intuition_protos.h>
-#include <clib/ddebug_protos.h>
 #include <exec/memory.h>
 #include <exec/ports.h>
 #include <devices/serial.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "io.h"
@@ -31,6 +31,10 @@
 unsigned char read_io_active=false;
 
 extern void done(void);
+extern struct Window *myWindow;
+extern unsigned long sigbits;
+extern unsigned char device_requester_is_active;
+extern unsigned char device_requester_was_cancelled;
 
 MySer* ms;
 struct Message* io_msg;
@@ -67,7 +71,7 @@ int io_ctl(MySer *dev, int op) {
         if(dev->readio) {
             dev->state |= RIO_OPEN;
         }
-        dev->writeio = (struct IOExtSer *)CreateExtIO(ms->readport,  sizeof(struct IOExtSer));
+        dev->writeio = (struct IOExtSer *)CreateExtIO(dev->writeport,  sizeof(struct IOExtSer));
         if(dev->writeio) {
             dev->state |= WIO_OPEN;
         }
@@ -108,7 +112,10 @@ int io_ctl(MySer *dev, int op) {
             }
             dev->readio->IOSer.io_Command = CMD_RESET; /* reset the device just to be paranoid */
             dev->readio->IOSer.io_Flags = 0;
-            SendIO((struct IORequest *)dev->readio);
+            /* Do this synchronously, the request must not still be in
+             * flight when it is deleted below.
+             */
+            DoIO((struct IORequest *)dev->readio);
         }
         /* otherwise we check the state in order and close whatever has it's bit set */
         if(dev->state & DEV_OPEN) {
@@ -159,16 +166,22 @@ void io_init(void)
       if (strcmp(ms->name,"serial.device")==0)
       {
           //can't open even serial.device so pop up the requester.
-          extern struct Window *myWindow;
-          extern unsigned char device_requester_is_active;
           io_ctl(ms,IO_CLOSE);
           requester_devices_run();
           for(;;) { /* this duplicates the mainloop but blocks io_init until the requester finishes */
               Wait(1L << myWindow->UserPort->mp_SigBit);   
               keyboard_main();
               if(device_requester_is_active == 0)
-                  return;
+                  break;
           }
+          if (device_requester_was_cancelled)
+            {
+              /* The requester was dismissed without applying any settings,
+               * without a device there is nothing left to talk to.
+               */
+              done();
+            }
+          return;
       }
       else
 	{
@@ -221,6 +234,12 @@ void io_init(void)
   ms->readio->IOSer.io_Data = (APTR) ms->readdata;
   SendIO((struct IORequest *)ms->readio);
   read_io_active=true;
+
+  /* The device has been re-opened, the read port can have been given a
+   * different signal bit than the one the main loop is waiting for, so
+   * the main loop has to be told about the new one.
+   */
+  sigbits=(1L << ms->readport->mp_SigBit) | (1L << myWindow->UserPort->mp_SigBit);
 }
 
 /**
@@ -264,7 +283,7 @@ char* io_status_serflags(void)
     {
       return "RTS/CTS ";
     }
-  else if (ms->readio->io_SerFlags & (SERF_XDISABLED==0))
+  else if (!(ms->readio->io_SerFlags & SERF_XDISABLED))
     {
       return "XON/XOFF";
     }
@@ -290,6 +309,9 @@ void io_main(void)
   long len;
   if (io_msg=GetMsg(ms->readport))
     {
+      /* Reply to the message we just received, we don't need it any more */
+      ReplyMsg((struct Message *)io_msg);
+
       /* process pending single byte */
       ShowPLATO((padByte*)ms->readdata,1);
 
@@ -332,6 +354,7 @@ void io_done(void)
       io_ctl(ms,IO_CLOSE);
       // Finally, free the serial I/O structure
       FreeMem(ms,sizeof(MySer));
+      ms=NULL;
     }
    device_is_opened = 0;
    read_io_active = 0;

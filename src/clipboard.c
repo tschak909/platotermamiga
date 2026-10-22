@@ -95,14 +95,53 @@ unsigned char clipboard_coord_y(unsigned short y)
  */
 unsigned char clipboard_update_buffer(padPt* Coord, unsigned char* ch, unsigned char count)
 {
-  int dest = (clipboard_coord_y(Coord->y) * 64) + clipboard_coord_x(Coord->x);
-  strncpy(&clipboard_buffer[dest],ch,count);
+  int line = clipboard_coord_y(Coord->y);
+  int col = clipboard_coord_x(Coord->x);
+  int written = 0;
+
+  while (count > 0)
+    {
+      int chunk;
+
+      /* The coordinates may be out of range, in which case the text
+       * continues on the next line.
+       */
+      if (col >= 64)
+        {
+          col = 0;
+          line++;
+        }
+
+      /* Don't run off the end of the clipboard buffer */
+      if (line >= 32)
+        break;
+
+      /* Don't run past the end of the line */
+      chunk = 64 - col;
+      if (chunk > (int)count)
+        chunk = count;
+
+      memcpy(&clipboard_buffer[line*64+col],ch,chunk);
+
+      ch += chunk;
+      count -= chunk;
+      written += chunk;
+      col += chunk;
+
+      if (col >= 64)
+        {
+          col = 0;
+          line++;
+        }
+    }
+
+  return written;
 }
 
 /**
  * Write 4 bytes to clipboard device. Used for headers
  */
-void clipboard_write_long(long* data)
+void clipboard_write_long(ULONG* data)
 {
   clip_ior->io_Data=(STRPTR)data;
   clip_ior->io_Length=4;
@@ -115,13 +154,13 @@ void clipboard_write_long(long* data)
  */
 void clipboard_write_screen(void)
 {
-  long length=96096;
-  long bmhdlength=20;
-  long cmaplength=24;
-  long camglength=4;
-  long dpiLength=4;
-  long dpiData=0;
-  long bodylength=96000;
+  ULONG length;
+  ULONG bmhdlength=20;
+  ULONG cmaplength=24;
+  ULONG camglength=4;
+  ULONG dpiLength=4;
+  ULONG dpiData=0;
+  ULONG bodylength;
   unsigned short i,j;
   typedef UBYTE Masking;     /* Choice of masking technique. */
 
@@ -151,6 +190,18 @@ void clipboard_write_screen(void)
 
   BMHDData bmhdData;
 
+  /* The image is the raw contents of the window's bitmap, so its size
+   * depends on the size of the bitmap, which is different in PAL mode.
+   */
+  bodylength=(ULONG)myWindow->RPort->BitMap->Rows*
+             (ULONG)myWindow->RPort->BitMap->Depth*
+             (ULONG)myWindow->RPort->BitMap->BytesPerRow;
+
+  /* The FORM chunk contains the "ILBM" identifier and all of the chunks
+   * that follow it.
+   */
+  length=4+28+32+12+12+8+bodylength;
+
   typedef struct {
     UBYTE red, green, blue;           /* color intensities 0..255 */
   } ColorRegister;                  /* size = 3 bytes           */
@@ -159,9 +210,8 @@ void clipboard_write_screen(void)
 
   ColorMap cmap;
   ULONG modeflags=0x8004;
-  
-  bmhdData.w=640;
-  bmhdData.h=400;
+  bmhdData.w=myWindow->RPort->BitMap->BytesPerRow*8;
+  bmhdData.h=myWindow->RPort->BitMap->Rows;
   bmhdData.x=0;
   bmhdData.y=0;
   bmhdData.nPlanes=myWindow->RPort->BitMap->Depth;
@@ -171,20 +221,20 @@ void clipboard_write_screen(void)
   bmhdData.transparentColor=0;
   bmhdData.xAspect=10;
   bmhdData.yAspect=11;
-  bmhdData.pageWidth=640;
-  bmhdData.pageHeight=400;
+  bmhdData.pageWidth=bmhdData.w;
+  bmhdData.pageHeight=bmhdData.h;
   
   // Write header
   clip_ior->io_Offset=0;
   clip_ior->io_Error=0;
   clip_ior->io_ClipID=0;
-  clipboard_write_long((long *)"FORM");
+  clipboard_write_long((ULONG *)"FORM");
   clipboard_write_long(&length);
-  clipboard_write_long((long *)"ILBM");
+  clipboard_write_long((ULONG *)"ILBM");
 
 
   // Write BMHD
-  clipboard_write_long((long *)"BMHD");
+  clipboard_write_long((ULONG *)"BMHD");
   clipboard_write_long(&bmhdlength);
   clip_ior->io_Data=(STRPTR)&bmhdData;
   clip_ior->io_Length=sizeof(bmhdData);
@@ -192,7 +242,7 @@ void clipboard_write_screen(void)
   DoIO((struct IORequest *)clip_ior);
   
   // Write CMAP
-  clipboard_write_long((long *)"CMAP");
+  clipboard_write_long((ULONG *)"CMAP");
   clipboard_write_long(&cmaplength);
   for (i=0;i<8;i++)
     {
@@ -212,16 +262,16 @@ void clipboard_write_screen(void)
   DoIO((struct IORequest *)clip_ior);
 
   // Write CAMG
-  clipboard_write_long((long *)"CAMG");
+  clipboard_write_long((ULONG *)"CAMG");
   clipboard_write_long(&camglength);
   clipboard_write_long(&modeflags);
 
-  clipboard_write_long((long *)"DPI ");
+  clipboard_write_long((ULONG *)"DPI ");
   clipboard_write_long(&dpiLength);
   clipboard_write_long(&dpiData);
   
   // Write BODY
-  clipboard_write_long((long *)"BODY");
+  clipboard_write_long((ULONG *)"BODY");
   clipboard_write_long(&bodylength);
   for (i=0;i<myWindow->RPort->BitMap->Rows;i++)
     {
@@ -244,18 +294,18 @@ void clipboard_write_screen(void)
  */
 void clipboard_write(void)
 {
-  unsigned long length=HEADER_SIZE+CLIPBOARD_BUFFER_SIZE+LF_PADDING_SIZE;
-  unsigned long slength=CLIPBOARD_BUFFER_SIZE+LF_PADDING_SIZE;
+  ULONG length=HEADER_SIZE+CLIPBOARD_BUFFER_SIZE+LF_PADDING_SIZE;
+  ULONG slength=CLIPBOARD_BUFFER_SIZE+LF_PADDING_SIZE;
   unsigned char line=0;
   
   // Write header
   clip_ior->io_Offset=0;
   clip_ior->io_Error=0;
   clip_ior->io_ClipID=0;
-  clipboard_write_long((long *)"FORM");
+  clipboard_write_long((ULONG *)"FORM");
   clipboard_write_long(&length);
-  clipboard_write_long((long *)"FTXT");
-  clipboard_write_long((long *)"CHRS");
+  clipboard_write_long((ULONG *)"FTXT");
+  clipboard_write_long((ULONG *)"CHRS");
   clipboard_write_long(&slength);
 
   for (line=0;line<32;line++)
